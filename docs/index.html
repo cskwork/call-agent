@@ -33,11 +33,20 @@
     code,pre,kbd,.mono{font-family:var(--mono)}
     .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
 
+    /* language toggle */
+    body.lang-en .i18n-ko{display:none}
+    body.lang-ko .i18n-en{display:none}
+    .lang-toggle{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;margin-left:14px}
+    .lang-toggle button{appearance:none;background:transparent;color:var(--muted);border:0;padding:6px 10px;font-family:var(--mono);font-size:12px;cursor:pointer;letter-spacing:.04em}
+    .lang-toggle button.active{background:var(--panel);color:var(--accent)}
+    .lang-toggle button:hover:not(.active){color:var(--fg)}
+
     /* nav */
     .nav{position:sticky;top:0;z-index:5;background:rgba(11,13,16,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-    .nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px}
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;gap:8px;flex-wrap:wrap}
     .brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:.2px}
     .brand .dot{width:9px;height:9px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent)}
+    .nav-right{display:flex;align-items:center}
     .nav a.nav-link{color:var(--muted);margin-left:18px;font-size:14px}
     .nav a.nav-link:hover{color:var(--fg);text-decoration:none}
 
@@ -73,7 +82,18 @@
     /* sections */
     section{padding:72px 0;border-bottom:1px solid var(--line)}
     h2{font-size:28px;margin:0 0 8px;letter-spacing:-.01em}
-    .sub{color:var(--muted);margin:0 0 32px}
+    .sub{color:var(--muted);margin:0 0 32px;max-width:780px}
+    .section-body p{color:#c4ccd6;font-size:15.5px;max-width:780px}
+    .section-body p + p{margin-top:14px}
+    .section-body ul{color:#c4ccd6;font-size:15.5px;max-width:780px;padding-left:22px}
+    .section-body li{margin:6px 0}
+    .section-body blockquote{margin:18px 0;padding:14px 18px;border-left:3px solid var(--accent);background:rgba(124,240,196,.04);color:#c4ccd6;font-style:italic;border-radius:0 8px 8px 0;max-width:780px}
+
+    /* glossary */
+    .gloss{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+    .gloss .term{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+    .gloss .term h4{margin:0 0 6px;font-family:var(--mono);font-size:14px;color:var(--accent)}
+    .gloss .term p{margin:0;color:#c4ccd6;font-size:14px}
 
     /* skills grid */
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
@@ -101,43 +121,76 @@
     .policy .card h3{font-family:var(--sans);font-size:16px;margin-bottom:8px}
     .policy .card p{font-size:14.5px}
 
+    /* faq */
+    .faq{display:grid;gap:12px;max-width:880px}
+    .faq details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+    .faq details[open]{border-color:var(--line-2)}
+    .faq summary{cursor:pointer;font-weight:600;font-size:15px;list-style:none}
+    .faq summary::-webkit-details-marker{display:none}
+    .faq summary::before{content:"+ ";color:var(--accent);font-family:var(--mono)}
+    .faq details[open] summary::before{content:"− "}
+    .faq details > *:not(summary){margin-top:10px;color:#c4ccd6;font-size:14.5px}
+
     /* footer */
     footer{padding:40px 0 60px;color:var(--muted);font-size:13.5px}
     footer .row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    footer a{color:var(--accent-2)}
 
     @media (max-width:640px){
       .hero{padding:60px 0 40px}
       section{padding:56px 0}
       .nav a.nav-link{margin-left:12px}
+      .lang-toggle{margin-left:10px}
     }
   </style>
 </head>
-<body>
+<body class="lang-en">
   <header class="nav">
     <div class="wrap nav-inner">
       <div class="brand"><span class="dot"></span><span class="mono">cc-agent-call</span></div>
-      <nav>
-        <a class="nav-link" href="#skills">Skills</a>
-        <a class="nav-link" href="#install">Install</a>
-        <a class="nav-link" href="#prereq">Prerequisites</a>
-        <a class="nav-link" href="https://github.com/cskwork/cc-agent-call">GitHub</a>
-      </nav>
+      <div class="nav-right">
+        <nav>
+          <a class="nav-link" href="#glossary"><span class="i18n-en">Glossary</span><span class="i18n-ko">용어</span></a>
+          <a class="nav-link" href="#why"><span class="i18n-en">Why</span><span class="i18n-ko">왜</span></a>
+          <a class="nav-link" href="#skills"><span class="i18n-en">Skills</span><span class="i18n-ko">스킬</span></a>
+          <a class="nav-link" href="#install"><span class="i18n-en">Install</span><span class="i18n-ko">설치</span></a>
+          <a class="nav-link" href="#faq">FAQ</a>
+          <a class="nav-link" href="https://github.com/cskwork/cc-agent-call">GitHub</a>
+        </nav>
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button data-lang="en" class="active" aria-label="English">EN</button>
+          <button data-lang="ko" aria-label="한국어">KO</button>
+        </div>
+      </div>
     </div>
   </header>
 
+  <!-- ========================= HERO ========================= -->
   <section class="hero">
     <div class="wrap">
       <div class="eyebrow">// cross-cli delegation skills</div>
-      <h1>One agentic CLI, <span class="grad">five tools at its back.</span></h1>
-      <p class="lede">
-        Let Claude Code or Codex shell out to <b>agy</b>, <b>kiro-cli</b>, <b>codex</b>,
-        <b>NotebookLM</b>, or <b>Claude Code</b> when the target tool has a feature
-        the host lacks — or when the user explicitly names it.
-      </p>
+
+      <div class="i18n-en">
+        <h1>One agentic CLI, <span class="grad">five tools at its back.</span></h1>
+        <p class="lede">
+          A bundle of "delegation skills" that let the AI CLI you have open (Claude Code or Codex)
+          shell out to <b>agy</b>, <b>kiro-cli</b>, <b>codex</b>, <b>NotebookLM</b>, or <b>Claude Code</b>
+          when the other tool is genuinely better at the task — without you leaving the terminal.
+        </p>
+      </div>
+      <div class="i18n-ko">
+        <h1>한 개의 CLI 안에서, <span class="grad">다섯 도구를 부린다.</span></h1>
+        <p class="lede">
+          지금 켜놓은 AI CLI(Claude Code 또는 Codex)가 못 하는 일을 다른 CLI
+          (<b>agy</b>, <b>kiro-cli</b>, <b>codex</b>, <b>NotebookLM</b>, <b>Claude Code</b>) 에게
+          <b>자동으로 떠넘기게</b> 해 주는 "위임 스킬" 모음입니다. 터미널을 갈아탈 필요가 없습니다.
+        </p>
+      </div>
+
       <div class="cta">
-        <a class="btn primary" href="#install">Install</a>
-        <a class="btn" href="https://github.com/cskwork/cc-agent-call">View on GitHub</a>
-        <a class="btn" href="#skills">See skills</a>
+        <a class="btn primary" href="#install"><span class="i18n-en">Install</span><span class="i18n-ko">설치하기</span></a>
+        <a class="btn" href="https://github.com/cskwork/cc-agent-call"><span class="i18n-en">View on GitHub</span><span class="i18n-ko">GitHub에서 보기</span></a>
+        <a class="btn" href="#skills"><span class="i18n-en">See skills</span><span class="i18n-ko">스킬 보기</span></a>
       </div>
       <div class="pills">
         <span class="pill">5 skills</span>
@@ -163,10 +216,94 @@
     </div>
   </section>
 
+  <!-- ========================= GLOSSARY ========================= -->
+  <section id="glossary">
+    <div class="wrap">
+      <h2><span class="i18n-en">Read this first — glossary</span><span class="i18n-ko">먼저 — 용어 미리보기</span></h2>
+      <p class="sub">
+        <span class="i18n-en">A few terms used throughout this page.</span>
+        <span class="i18n-ko">이 문서에서 반복해 쓰는 단어를 먼저 정리합니다.</span>
+      </p>
+
+      <div class="gloss">
+        <div class="term">
+          <h4>Agentic CLI</h4>
+          <p class="i18n-en">An AI tool that runs in your terminal. When you say "do X," it reads files, edits code, and runs commands on its own. Examples: Claude Code, OpenAI Codex CLI, Google Antigravity (<code>agy</code>), AWS Kiro CLI (<code>kiro-cli</code>).</p>
+          <p class="i18n-ko">터미널에서 도는 AI 도구. 사람이 "이거 해줘" 하면 스스로 파일을 읽고/고치고/명령을 실행함. 예: Claude Code, OpenAI Codex CLI, Google Antigravity(<code>agy</code>), AWS Kiro CLI(<code>kiro-cli</code>).</p>
+        </div>
+        <div class="term">
+          <h4>Host</h4>
+          <p class="i18n-en">The CLI you have open and are talking to right now. Usually Claude Code or Codex.</p>
+          <p class="i18n-ko">지금 당신이 켜놓고 대화 중인 CLI. 보통 Claude Code 또는 Codex.</p>
+        </div>
+        <div class="term">
+          <h4>Skill</h4>
+          <p class="i18n-en">A folder with a <code>SKILL.md</code> plus optional scripts. Claude Code / Codex auto-discover it and load the right one based on your request.</p>
+          <p class="i18n-ko">"특정 상황에서 어떻게 행동할지" 를 적어둔 폴더 (<code>SKILL.md</code> 한 장 + 부속 스크립트). 호스트가 자동으로 발견·로드.</p>
+        </div>
+        <div class="term">
+          <h4>Delegation</h4>
+          <p class="i18n-en">Instead of doing the work itself, the host shells out to <b>another CLI</b> and returns the result. This is what cc-agent-call enables.</p>
+          <p class="i18n-ko">호스트가 직접 처리하지 않고 <b>다른 CLI를 셸에서 실행</b>시켜 결과를 받아오는 행동. 이 저장소의 핵심 동작.</p>
+        </div>
+        <div class="term">
+          <h4>MCP</h4>
+          <p class="i18n-en">Model Context Protocol — a shared protocol that lets different AI tools talk to the same external servers (files, DBs, web). Used by <code>kiro-call</code>'s cross-registry feature.</p>
+          <p class="i18n-ko">Model Context Protocol. 여러 AI 도구가 공통으로 외부 서버(파일·DB·웹)에 접근하기 위한 규약. <code>kiro-call</code>의 cross-registry에서 등장.</p>
+        </div>
+        <div class="term">
+          <h4>RAG</h4>
+          <p class="i18n-en">Retrieval-Augmented Generation — the model retrieves source documents first and uses them as grounded evidence. NotebookLM is built around this.</p>
+          <p class="i18n-ko">Retrieval-Augmented Generation. 답하기 전에 외부 문서를 먼저 검색해 근거로 사용. NotebookLM이 잘하는 일.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= WHY ========================= -->
+  <section id="why">
+    <div class="wrap">
+      <h2><span class="i18n-en">Why does this exist?</span><span class="i18n-ko">왜 만들었나요?</span></h2>
+      <p class="sub">
+        <span class="i18n-en">Several agentic CLIs landed around the same time. They look similar, but each is genuinely better at different things.</span>
+        <span class="i18n-ko">비슷한 시기에 여러 회사가 "내 AI CLI" 를 내놓았습니다. 다 비슷해 보이지만 각자 잘하는 게 다릅니다.</span>
+      </p>
+
+      <div class="section-body">
+        <div class="i18n-en">
+          <ul>
+            <li><b>Claude Code</b> — Strong at editing code, planning, and analyzing large codebases (1M-token context). Cannot generate images.</li>
+            <li><b>OpenAI Codex CLI</b> — Has image generation (<code>gpt-image-2</code>) and a polished <code>codex review</code> for PR-level reviews.</li>
+            <li><b>Google Antigravity (<code>agy</code>)</b> — Bakes Google Search grounding into the model's reasoning loop; direct access to scientific databases (gnomAD, UniProt, PubMed).</li>
+            <li><b>AWS Kiro CLI (<code>kiro-cli</code>)</b> — Headless agentic terminal, natural-language → shell translation, AWS Bedrock-based second opinion.</li>
+            <li><b>NotebookLM</b> — Drop in PDFs / URLs / YouTube and get faithful RAG answers; can produce audio overviews.</li>
+          </ul>
+          <blockquote>"I'm in the middle of working in Claude Code and I just need one diagram image. Now I have to open another terminal, launch Codex, copy context over… annoying."</blockquote>
+          <p><b>cc-agent-call</b> removes that friction. Inside Claude Code you say "generate an image of …" and Claude Code automatically invokes <code>codex-call</code>, which shells out to Codex, generates the image, and reports the path back. You never leave the host CLI.</p>
+        </div>
+        <div class="i18n-ko">
+          <ul>
+            <li><b>Claude Code</b> — 코드 편집·기획·1M 토큰 컨텍스트로 큰 코드베이스 분석에 강함. 이미지 생성은 못 함.</li>
+            <li><b>OpenAI Codex CLI</b> — 이미지 생성(<code>gpt-image-2</code>) 가능, <code>codex review</code>로 PR 단위 리뷰가 강함.</li>
+            <li><b>Google Antigravity (<code>agy</code>)</b> — Google Search를 모델 추론 단계에 끼워주는 grounding, gnomAD/UniProt 같은 과학 DB 직결.</li>
+            <li><b>AWS Kiro CLI (<code>kiro-cli</code>)</b> — 헤드리스 자동화에 강하고, "자연어 → 셸 명령" 번역, AWS Bedrock 모델로 2차 의견.</li>
+            <li><b>NotebookLM</b> — PDF·웹·유튜브를 통째로 넣고 정확한 RAG 답변, 오디오 개요 생성.</li>
+          </ul>
+          <blockquote>"지금 Claude Code로 작업 중인데 다이어그램 이미지가 하나 필요해. 일일이 다른 터미널 열어서 Codex 켜고… 귀찮네."</blockquote>
+          <p><b>cc-agent-call</b>은 그 귀찮음을 없앱니다. Claude Code 안에서 "이미지 하나 만들어줘" 라고 하면, Claude Code가 알아서 <code>codex-call</code> 스킬을 통해 Codex를 실행해 이미지를 받아옵니다. 사용자는 CLI를 갈아탈 필요가 없습니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= SKILLS ========================= -->
   <section id="skills">
     <div class="wrap">
-      <h2>Skills</h2>
-      <p class="sub">Each skill is a SKILL.md file that the host CLI auto-discovers. Symlinked, not vendored.</p>
+      <h2><span class="i18n-en">The 5 skills</span><span class="i18n-ko">들어있는 스킬 5개</span></h2>
+      <p class="sub">
+        <span class="i18n-en">Each skill is a <code>SKILL.md</code> that the host CLI auto-discovers. Symlinked, not vendored.</span>
+        <span class="i18n-ko">각 스킬은 <code>SKILL.md</code> 한 장 — 호스트가 자동 발견. 복사 아닌 symlink.</span>
+      </p>
       <div class="grid">
 
         <div class="card">
@@ -174,7 +311,8 @@
             <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/agy-call">agy-call</a></h3>
             <span class="badge cc">Claude Code</span>
           </div>
-          <p>Google Antigravity — Google Search grounding, image generation, second-opinion review, scientific databases (gnomAD, UniProt, PubMed).</p>
+          <p class="i18n-en">Google Antigravity — Google Search grounding, image generation, second-opinion review, scientific databases (gnomAD, UniProt, PubMed).</p>
+          <p class="i18n-ko">Google Antigravity — 최신 웹 정보 grounding, 이미지 생성, gnomAD/UniProt/PubMed 같은 생명과학 DB 조회, 2차 의견.</p>
         </div>
 
         <div class="card">
@@ -182,7 +320,8 @@
             <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/kiro-call">kiro-call</a></h3>
             <span class="badge cc">Claude Code</span>
           </div>
-          <p>AWS Kiro CLI — headless agentic terminal, natural-language → shell translation, MCP cross-registry, AWS Bedrock peer opinion.</p>
+          <p class="i18n-en">AWS Kiro CLI — headless agentic terminal, natural-language → shell translation, MCP cross-registry, AWS Bedrock peer opinion.</p>
+          <p class="i18n-ko">AWS Kiro CLI — "이거 하는 셸 명령 알려줘" 식 자연어 → 셸 번역, MCP 서버 교차 등록, AWS Bedrock 모델로 2차 의견.</p>
         </div>
 
         <div class="card">
@@ -190,7 +329,8 @@
             <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/codex-call">codex-call</a></h3>
             <span class="badge cc">Claude Code</span>
           </div>
-          <p>OpenAI Codex — highest-quality image generation via <code>gpt-image-2</code>, plus one-shot <code>codex review</code> for an outside take on a diff.</p>
+          <p class="i18n-en">OpenAI Codex — highest-quality image generation via <code>gpt-image-2</code>, plus one-shot <code>codex review</code> for an outside take on a diff.</p>
+          <p class="i18n-ko">OpenAI Codex — <code>gpt-image-2</code>로 고품질 이미지 생성, <code>codex review</code>로 외부 시각의 코드 리뷰.</p>
         </div>
 
         <div class="card">
@@ -198,7 +338,8 @@
             <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/notebooklm-call">notebooklm-call</a></h3>
             <span class="badge both">Claude Code + Codex</span>
           </div>
-          <p>NotebookLM — document RAG over PDFs/URLs/YouTube, audio overview generation, and bulk web research import.</p>
+          <p class="i18n-en">NotebookLM — document RAG over PDFs/URLs/YouTube, audio overview generation, and bulk web research import.</p>
+          <p class="i18n-ko">NotebookLM — PDF/URL/YouTube 문서 묶음에 대한 RAG QA, 오디오 개요, 대량 웹 자료 import.</p>
         </div>
 
         <div class="card">
@@ -206,22 +347,61 @@
             <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/claude-call">claude-call</a></h3>
             <span class="badge cx">Codex CLI</span>
           </div>
-          <p>Claude Code — 1M-context plan-mode planning and deep code review delegated from inside Codex.</p>
+          <p class="i18n-en">Claude Code — 1M-context plan-mode planning and deep code review delegated from inside Codex.</p>
+          <p class="i18n-ko">Claude Code — Codex 사용자가 1M 컨텍스트 기획(plan-mode)이나 대형 코드베이스 심층 리뷰가 필요할 때 사용.</p>
         </div>
 
       </div>
     </div>
   </section>
 
+  <!-- ========================= POLICY ========================= -->
+  <section id="policy">
+    <div class="wrap">
+      <h2><span class="i18n-en">When does a skill auto-fire?</span><span class="i18n-ko">언제 자동으로 호출되나요?</span></h2>
+      <p class="sub">
+        <span class="i18n-en">Each <code>SKILL.md</code> is configured so the host invokes it only under one of two conditions. No routine hijacking.</span>
+        <span class="i18n-ko">각 <code>SKILL.md</code>는 두 가지 조건 중 하나일 때만 발동. 평상시 작업은 가로채지 않음.</span>
+      </p>
+      <div class="policy">
+        <div class="card">
+          <h3><span class="i18n-en">① Explicit name</span><span class="i18n-ko">① 도구 이름 명시</span></h3>
+          <p class="i18n-en">The user names the target tool — <i>"use agy"</i>, <i>"ask codex"</i>, <i>"with NotebookLM"</i>. Intent is unambiguous, so dispatch.</p>
+          <p class="i18n-ko">사용자가 도구를 직접 호명 — <i>"agy로"</i>, <i>"ask codex"</i>, <i>"NotebookLM에 넣어줘"</i>. 의도가 명확하니 위임.</p>
+        </div>
+        <div class="card">
+          <h3><span class="i18n-en">② Capability gap</span><span class="i18n-ko">② 호스트가 native로 못 함</span></h3>
+          <p class="i18n-en">The user asks for something the host CLI cannot do natively — image generation for Claude Code, 1M-context planning for Codex, document RAG, Google Search grounding.</p>
+          <p class="i18n-ko">호스트가 native로 못 하는 기능 요청 — Claude Code에서의 이미지 생성, Codex에서의 1M 컨텍스트 기획, 문서 RAG, Google 검색 grounding.</p>
+        </div>
+        <div class="card">
+          <h3><span class="i18n-en">What it doesn't do</span><span class="i18n-ko">하지 않는 것</span></h3>
+          <p class="i18n-en">Does not hijack <i>"review this code"</i> or <i>"plan this feature"</i>. The host is presumed capable; delegation is the exception, not the default.</p>
+          <p class="i18n-ko"><i>"이 코드 리뷰해줘"</i>, <i>"이 기능 계획 짜줘"</i> 같은 루틴은 그대로 호스트가 처리. 위임은 예외 상황.</p>
+        </div>
+      </div>
+
+      <div class="section-body" style="margin-top:28px">
+        <p class="i18n-en"><b>Why so strict?</b> Calling an external CLI usually spends a separate token / credit balance, slows the response down, and makes it harder for you to trace what your tool is actually doing. So the trigger keywords are deliberately narrow — delegation fires only when it clearly pays off.</p>
+        <p class="i18n-ko"><b>왜 이렇게 보수적인가?</b> 외부 CLI 호출은 별도 토큰·크레딧을 소비하고, 응답 속도를 늦추며, "이 도구가 지금 뭘 하고 있는지" 추적을 어렵게 만듭니다. 그래서 트리거 키워드를 좁게 잡았습니다 — 명확히 이득일 때만 발동.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= INSTALL ========================= -->
   <section id="install">
     <div class="wrap">
-      <h2>Install</h2>
-      <p class="sub"><code>install.sh</code> symlinks each skill into the right host directory. No duplication, no global state.</p>
+      <h2><span class="i18n-en">Install</span><span class="i18n-ko">설치</span></h2>
+      <p class="sub">
+        <span class="i18n-en"><code>install.sh</code> creates <b>symlinks</b> from this repo's <code>skills/&lt;name&gt;</code> into the host CLI's skill directory. Because they're symlinks, a <code>git pull</code> here is immediately visible to the host.</span>
+        <span class="i18n-ko"><code>install.sh</code>는 이 저장소의 <code>skills/&lt;name&gt;</code> 폴더를 호스트 CLI가 보는 위치로 <b>symlink</b> 해줍니다. 복사가 아니라 링크라 저장소를 <code>git pull</code> 하면 호스트도 즉시 새 버전을 봅니다.</span>
+      </p>
       <div class="terminal">
         <div class="tbar"><span class="b r"></span><span class="b y"></span><span class="b g"></span><span class="title">install</span></div>
 <pre><span class="p">$</span> ./install.sh                 <span class="c"># link all skills</span>
 <span class="p">$</span> ./install.sh agy-call        <span class="c"># link one skill</span>
 <span class="p">$</span> ./install.sh --dry-run       <span class="c"># preview what would be linked</span>
+<span class="p">$</span> ./install.sh --uninstall     <span class="c"># remove every symlink this script created</span>
 
 <span class="c"># Targets:</span>
 <span class="c">#   Claude-Code skills → ~/.claude/skills/&lt;name&gt;</span>
@@ -229,60 +409,91 @@
 <span class="c">#   notebooklm-call    → linked into both</span>
 </pre>
       </div>
-    </div>
-  </section>
 
-  <section id="policy">
-    <div class="wrap">
-      <h2>Trigger policy</h2>
-      <p class="sub">Each SKILL.md is configured so the host CLI invokes it only when one of the two conditions is true. No routine hijacking.</p>
-      <div class="policy">
-        <div class="card">
-          <h3>① Explicit name</h3>
-          <p>The user names the target tool — <i>"use agy"</i>, <i>"ask codex"</i>, <i>"with NotebookLM"</i>. Intent is unambiguous, so dispatch.</p>
-        </div>
-        <div class="card">
-          <h3>② Capability gap</h3>
-          <p>The user asks for something the host CLI cannot do natively — image generation for Claude Code, 1M-context planning for Codex, document RAG, Google Search grounding.</p>
-        </div>
-        <div class="card">
-          <h3>What it doesn't do</h3>
-          <p>It does not hijack <i>"review this code"</i> or <i>"plan this feature"</i>. The host CLI is presumed capable; delegation is the exception, not the default.</p>
-        </div>
+      <div class="section-body" style="margin-top:28px">
+        <h3 style="margin:0 0 8px;font-size:18px"><span class="i18n-en">First run — 5-minute walkthrough</span><span class="i18n-ko">처음 써보기 — 5분 워크스루</span></h3>
+        <p class="i18n-en"><b>Scenario:</b> You're working in Claude Code and you need a hero illustration for a README.</p>
+        <p class="i18n-ko"><b>상황:</b> Claude Code로 작업 중인데 README용 일러스트가 필요하다.</p>
+      </div>
+
+      <div class="terminal" style="margin-top:14px">
+        <div class="tbar"><span class="b r"></span><span class="b y"></span><span class="b g"></span><span class="title">claude</span></div>
+<pre><span class="p">&gt;</span> <span class="s">"Generate an abstract illustration for the top of my README. 1:1 ratio."</span>
+
+<span class="c"># Claude Code cannot generate images natively.</span>
+<span class="c"># The installed codex-call skill fires automatically:</span>
+<span class="c">#   1. Reshapes your prompt for Codex and shells out to `codex`</span>
+<span class="c">#   2. Codex generates the image via gpt-image-2</span>
+<span class="c">#   3. Resulting file path is reported back in the Claude Code thread</span>
+
+<span class="c"># You never switched terminals.</span>
+</pre>
       </div>
     </div>
   </section>
 
+  <!-- ========================= PREREQ ========================= -->
   <section id="prereq">
     <div class="wrap">
-      <h2>Prerequisites</h2>
-      <p class="sub">Each skill is a thin wrapper. The underlying CLI must be installed and authenticated.</p>
+      <h2><span class="i18n-en">Per-skill prerequisites</span><span class="i18n-ko">스킬별 사전 준비</span></h2>
+      <p class="sub">
+        <span class="i18n-en">Each skill is a thin wrapper — the underlying CLI must be installed and authenticated. Only set up the skills you actually plan to use.</span>
+        <span class="i18n-ko">각 스킬은 얇은 wrapper일 뿐 — 실제 CLI 바이너리가 설치되고 인증돼 있어야 함. 본인이 쓸 것만 준비하면 됩니다.</span>
+      </p>
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Skill</th><th>Required binary</th><th>Auth</th></tr>
+            <tr>
+              <th><span class="i18n-en">Skill</span><span class="i18n-ko">스킬</span></th>
+              <th><span class="i18n-en">Required binary</span><span class="i18n-ko">필요한 바이너리</span></th>
+              <th><span class="i18n-en">Auth</span><span class="i18n-ko">인증</span></th>
+            </tr>
           </thead>
           <tbody>
-            <tr><td><code>agy-call</code></td><td><code>agy</code></td><td><code>agy install</code> then sign in</td></tr>
-            <tr><td><code>kiro-call</code></td><td><code>kiro-cli</code></td><td><code>kiro-cli login</code></td></tr>
-            <tr><td><code>codex-call</code></td><td><code>codex</code></td><td><code>codex login</code> or <code>OPENAI_API_KEY</code></td></tr>
-            <tr><td><code>notebooklm-call</code></td><td>Python 3.10+, <code>notebooklm</code></td><td><code>notebooklm login</code> (browser, one-time)</td></tr>
-            <tr><td><code>claude-call</code></td><td><code>claude</code></td><td><code>claude auth login</code> or <code>ANTHROPIC_API_KEY</code></td></tr>
+            <tr>
+              <td><code>agy-call</code></td>
+              <td><code>agy</code></td>
+              <td><span class="i18n-en"><code>agy install</code> then Google sign-in</span><span class="i18n-ko"><code>agy install</code> 후 Google 로그인</span></td>
+            </tr>
+            <tr>
+              <td><code>kiro-call</code></td>
+              <td><code>kiro-cli</code></td>
+              <td><code>kiro-cli login</code></td>
+            </tr>
+            <tr>
+              <td><code>codex-call</code></td>
+              <td><code>codex</code></td>
+              <td><span class="i18n-en"><code>codex login</code> (ChatGPT) or <code>OPENAI_API_KEY</code></span><span class="i18n-ko"><code>codex login</code> (ChatGPT) 또는 <code>OPENAI_API_KEY</code> 환경변수</span></td>
+            </tr>
+            <tr>
+              <td><code>notebooklm-call</code></td>
+              <td>Python 3.10+, <code>notebooklm</code></td>
+              <td><span class="i18n-en"><code>notebooklm login</code> (browser, one-time)</span><span class="i18n-ko"><code>notebooklm login</code> (브라우저 1회)</span></td>
+            </tr>
+            <tr>
+              <td><code>claude-call</code></td>
+              <td><code>claude</code></td>
+              <td><span class="i18n-en"><code>claude auth login</code> or <code>ANTHROPIC_API_KEY</code></span><span class="i18n-ko"><code>claude auth login</code> 또는 <code>ANTHROPIC_API_KEY</code> 환경변수</span></td>
+            </tr>
           </tbody>
         </table>
       </div>
     </div>
   </section>
 
+  <!-- ========================= TESTS ========================= -->
   <section id="tests">
     <div class="wrap">
-      <h2>Tests</h2>
-      <p class="sub">Four levels, opt in to higher levels with env flags so you don't burn API credit by default.</p>
+      <h2><span class="i18n-en">Tests</span><span class="i18n-ko">테스트</span></h2>
+      <p class="sub">
+        <span class="i18n-en">Four levels. Opt in to higher levels with env flags so you don't burn API credit by default.</span>
+        <span class="i18n-ko">4단계. 기본은 무료 단계만; 상위 단계는 환경변수로 켜야 동작 (실제 모델 호출 → 비용 발생).</span>
+      </p>
       <div class="terminal">
         <div class="tbar"><span class="b r"></span><span class="b y"></span><span class="b g"></span><span class="title">tests</span></div>
-<pre><span class="p">$</span> ./tests/run-all.sh                 <span class="c"># L0 + L1: binary present, help works</span>
-<span class="p">$</span> RUN_L2=1 ./tests/run-all.sh        <span class="c"># adds round-trip prompts (uses credit)</span>
-<span class="p">$</span> RUN_L3=1 ./tests/run-all.sh        <span class="c"># adds feature exercises (image gen etc.)</span>
+<pre><span class="p">$</span> ./tests/run-all.sh                 <span class="c"># L0 + L1: binary present, --help works</span>
+<span class="p">$</span> RUN_L2=1 ./tests/run-all.sh        <span class="c"># adds L2: real round-trip prompts (uses credit)</span>
+<span class="p">$</span> RUN_L3=1 ./tests/run-all.sh        <span class="c"># adds L3: feature exercises (image gen etc.)</span>
 
 <span class="c"># Each skill also has its own smoke test:</span>
 <span class="p">$</span> ./skills/agy-call/tests/smoke.sh
@@ -291,11 +502,68 @@
     </div>
   </section>
 
+  <!-- ========================= FAQ ========================= -->
+  <section id="faq">
+    <div class="wrap">
+      <h2>FAQ</h2>
+      <p class="sub">
+        <span class="i18n-en">Common questions before you install.</span>
+        <span class="i18n-ko">설치 전 자주 묻는 질문.</span>
+      </p>
+      <div class="faq">
+        <details>
+          <summary><span class="i18n-en">I don't use a host CLI — can't I just use the external CLI directly?</span><span class="i18n-ko">호스트 CLI를 안 쓰는데 그냥 외부 CLI만 쓰면 안 되나요?</span></summary>
+          <p class="i18n-en">Yes. This repo is only useful when you want to <b>stay inside the host CLI's flow</b> while occasionally calling out. For standalone use, just run the target CLI directly.</p>
+          <p class="i18n-ko">됩니다. 이 저장소는 <b>호스트 안에서 흐름을 끊지 않고 외부 CLI를 부르는 경우</b>에만 의미가 있습니다. 단독 사용이라면 그냥 해당 CLI를 직접 쓰는 게 빠릅니다.</p>
+        </details>
+        <details>
+          <summary><span class="i18n-en">I don't want skills auto-firing.</span><span class="i18n-ko">스킬이 자동 호출되는 게 싫어요.</span></summary>
+          <p class="i18n-en">Disable the skill in the host CLI's settings, or run <code>./install.sh --uninstall</code> to drop the symlinks. The repo itself can stay in place.</p>
+          <p class="i18n-ko">호스트 CLI 설정에서 스킬을 비활성화하거나, <code>./install.sh --uninstall</code>로 symlink만 제거하면 됩니다. 저장소 자체는 그대로 둬도 무방합니다.</p>
+        </details>
+        <details>
+          <summary><span class="i18n-en">Can I add a brand-new CLI?</span><span class="i18n-ko">새 CLI(예: 차세대 도구)도 추가할 수 있나요?</span></summary>
+          <p class="i18n-en">Yes. Create <code>skills/&lt;new-name&gt;/SKILL.md</code> and add a case in <code>install.sh</code>'s <code>declare_targets()</code> mapping it to the right host directory.</p>
+          <p class="i18n-ko">가능합니다. <code>skills/&lt;new-name&gt;/SKILL.md</code>를 만들고 <code>install.sh</code>의 <code>declare_targets()</code> 케이스에 호스트 위치를 추가하면 됩니다.</p>
+        </details>
+        <details>
+          <summary><span class="i18n-en">What about security?</span><span class="i18n-ko">보안은 어떤가요?</span></summary>
+          <p class="i18n-en">This repo stores no tokens. Each CLI authenticates the standard way for that tool (config file or env var).</p>
+          <p class="i18n-ko">이 저장소는 토큰을 보관하지 않습니다. 각 CLI의 인증은 해당 도구의 표준 방식(설정 파일 / 환경변수)을 그대로 사용합니다.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
   <footer>
     <div class="wrap row">
-      <div>MIT License · Built by <a href="https://github.com/cskwork">@cskwork</a></div>
+      <div>
+        <span class="i18n-en">MIT License · Built by <a href="https://github.com/cskwork">@cskwork</a></span>
+        <span class="i18n-ko">MIT License · 제작 <a href="https://github.com/cskwork">@cskwork</a></span>
+      </div>
       <div><a href="https://github.com/cskwork/cc-agent-call">github.com/cskwork/cc-agent-call</a></div>
     </div>
   </footer>
+
+  <script>
+    (function(){
+      var KEY = 'cc-agent-call-lang';
+      var buttons = document.querySelectorAll('.lang-toggle button[data-lang]');
+      function setLang(lang){
+        if (lang !== 'en' && lang !== 'ko') lang = 'en';
+        document.body.classList.remove('lang-en','lang-ko');
+        document.body.classList.add('lang-' + lang);
+        document.documentElement.lang = lang;
+        try { localStorage.setItem(KEY, lang); } catch(e){}
+        buttons.forEach(function(b){ b.classList.toggle('active', b.dataset.lang === lang); });
+      }
+      var stored = null;
+      try { stored = localStorage.getItem(KEY); } catch(e){}
+      setLang(stored === 'ko' ? 'ko' : 'en');
+      buttons.forEach(function(b){
+        b.addEventListener('click', function(){ setLang(b.dataset.lang); });
+      });
+    })();
+  </script>
 </body>
 </html>
