@@ -52,13 +52,15 @@ If auth is missing, surface this verbatim:
 
 `notebooklm use <id>` mutates a per-profile active-notebook context file.
 **Never** rely on it in scripted multi-agent runs. Always pass the
-notebook ID explicitly:
+notebook ID explicitly with `-n` / `--notebook`:
 
 ```bash
-notebooklm ask --notebook "$NB_ID" "<QUESTION>"
-notebooklm generate audio --notebook "$NB_ID" --out audio.mp3
-notebooklm download artifact --notebook "$NB_ID" <ART_ID> --out file.pdf
+notebooklm ask -n "$NB_ID" "<QUESTION>"                      # 0.3.x and 0.5.x
+notebooklm generate audio -n "$NB_ID" --out audio.mp3
+notebooklm download audio -n "$NB_ID" --out a.mp3
 ```
+
+Partial IDs are accepted: `notebooklm delete -n abc -y` matches `abc123...`.
 
 For truly parallel agents, also isolate state:
 
@@ -70,16 +72,15 @@ wait
 
 ## Common operations
 
-| Need | Command |
+| Need | Command (0.3.x; 0.5.x adds richer flags) |
 |---|---|
-| Create notebook | `notebooklm create "<TITLE>"` (prints `<ID>`) |
-| Add a PDF source | `notebooklm source add --notebook <ID> /abs/path/file.pdf` |
-| Add a URL | `notebooklm source add --notebook <ID> --url https://...` |
-| Add YouTube | `notebooklm source add --notebook <ID> --youtube https://...` |
-| Ask | `notebooklm ask --notebook <ID> "<Q>" --save-as-note` |
-| Audio overview | `notebooklm generate audio --notebook <ID> --language en --format deep-dive --out a.mp3` |
-| Mind map | `notebooklm generate mind-map --notebook <ID> --out map.json` |
-| Research import | `notebooklm research --notebook <ID> --mode deep "<TOPIC>"` |
+| Create notebook | `notebooklm create "<TITLE>" --json` (→ `{"notebook":{"id":...}}`) |
+| List | `notebooklm list` |
+| Add a source | `notebooklm source add -n <ID> <PATH-or-URL>` |
+| Ask | `notebooklm ask -n <ID> "<Q>"` (add `--json` for citations, `--save-as-note` for persistence) |
+| Audio overview | `notebooklm generate audio -n <ID> --out a.mp3` |
+| Mind map | `notebooklm generate mind-map -n <ID> --out map.json` |
+| Delete | `notebooklm delete -n <ID> -y` |
 
 ## Output
 
