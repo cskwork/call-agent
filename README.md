@@ -18,7 +18,11 @@ names it.
 ## Install
 
 ```bash
-git clone https://github.com/<you>/cc-agent-call
+# from GitHub
+git clone https://github.com/cskwork/cc-agent-call
+# or from self-hosted Gitea
+git clone https://gitea.agentic-worker.store/Donga-AX/cc-agent-call.git
+
 cd cc-agent-call
 ./install.sh             # symlinks all skills into the right host dirs
 ./install.sh agy-call    # install one skill
