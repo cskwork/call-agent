@@ -2,3 +2,6 @@
 *.swp
 *.tmp
 /.claude/settings.local.json
+/.antigravitycli/
+/.kilocode/
+/.codex/

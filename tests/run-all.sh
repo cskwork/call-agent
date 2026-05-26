@@ -6,7 +6,7 @@
 set -u
 
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-SKILLS=(agy-call kilo-call codex-call notebooklm-call claude-call)
+SKILLS=(agy-call kiro-call codex-call notebooklm-call claude-call)
 
 OVERALL=0
 for s in "${SKILLS[@]}"; do
