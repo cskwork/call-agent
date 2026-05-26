@@ -1,6 +1,6 @@
 ---
 name: kiro-call
-description: Delegate to AWS Kiro (the agentic IDE). Use ONLY when the user explicitly says "kiro", OR when the task is (a) registering an MCP server into Kiro's profile (`--add-mcp`), (b) opening a visual 3-way merge to resolve a conflict (`-m`), (c) opening a side-by-side diff viewer (`-d`), or (d) handing a prompt to Kiro's IDE chat (`kiro chat`) because the user wants Kiro's agent/edit/ask modes. Do NOT use for routine code edits, planning, or anything Claude Code can do natively in-terminal — Kiro pops a GUI window.
+description: Delegate to AWS Kiro CLI (`kiro-cli`, the AWS Q successor — a headless agentic terminal). Use ONLY when the user explicitly says "kiro" or "kiro-cli", OR when the task is (a) natural-language → shell command translation (`kiro-cli translate`), (b) a second opinion from an AWS Bedrock / Q-family model, or (c) cross-registering an MCP server so Kiro can use it (`kiro-cli mcp`). Do NOT use for routine code work — Claude Code does that natively.
 allowed-tools:
   - Bash
   - Read
@@ -11,89 +11,104 @@ allowed-tools:
 
 # kiro-call
 
-Shell out to the AWS Kiro IDE (`/usr/local/bin/kiro`, version 0.12.x). Kiro
-is a VS Code-based agentic IDE; its CLI is a launcher, so calling Kiro
-**opens a GUI window**. Use this skill only when the user wants Kiro's
-GUI affordances or chat agent specifically.
+Shell out to AWS Kiro CLI (`kiro-cli`) — a headless agentic terminal
+backed by AWS Bedrock / Kiro-managed models. Distinct from the Kiro IDE
+launcher (`/usr/local/bin/kiro`); this skill targets the CLI binary at
+`~/.local/bin/kiro-cli` only.
 
 ## When this skill fires
 
-1. **Explicit name** — user says "kiro".
+1. **Explicit name** — user says "kiro", "kiro-cli", or "ask kiro".
 2. **Feature gap** — user asks for:
-   - Registering an MCP server into Kiro's user profile so Kiro can call
-     it next time (`kiro --add-mcp <json>`)
-   - A visual 3-way merge UI (`kiro -m base v1 v2 out`)
-   - A side-by-side diff (`kiro -d a b`)
-   - Handing a prompt to Kiro's IDE chat in `ask` / `edit` / `agent` mode
-     (e.g. user has Kiro open and wants the prompt routed there)
+   - Natural-language → shell command translation
+     (`kiro-cli translate "<NL>"`)
+   - A peer opinion from a non-Anthropic / non-OpenAI model (AWS Bedrock
+     family via Kiro)
+   - Registering an MCP server in Kiro so Kiro can call it in future
+     sessions (`kiro-cli mcp`)
 
-Do NOT fire for: routine in-terminal coding, planning, or analysis —
-those stay in Claude Code (Kiro's CLI is GUI-only, no headless mode).
+Do NOT fire for: routine code edits, planning, or analysis — Claude
+Code handles those.
 
 ## Preflight
 
 ```bash
-command -v kiro >/dev/null || { echo "kiro not installed (https://kiro.dev)" >&2; exit 2; }
-kiro --version | head -1
+./scripts/kiro-preflight.sh
 ```
 
-## Operation 1 — register an MCP server into Kiro
+Verifies `kiro-cli` is on PATH, the user is logged in
+(`kiro-cli whoami`), and at least one agent profile exists.
 
-Easy automation target — no GUI, no chat, just a JSON-encoded server
-spec written into Kiro's user profile.
+## Canonical headless call
 
 ```bash
-./scripts/kiro-add-mcp.sh \
-  '{"name":"weather","command":"npx","args":["-y","@weather/mcp"]}'
+./scripts/kiro-chat.sh "<PROMPT>"
+
+# with options
+./scripts/kiro-chat.sh --agent default --model claude-sonnet-4 "<PROMPT>"
 ```
 
-Underlying call:
+Underlying:
 
 ```bash
-kiro --add-mcp '<JSON>'
+kiro-cli chat --no-interactive --trust-all-tools "<PROMPT>"
 ```
 
-Useful when the user has set up an MCP server for Claude Code and wants
-the same server available in Kiro's chat agent.
+`--no-interactive` prints final response to stdout and exits. `-a` /
+`--trust-all-tools` skips approval prompts (required for scripted use).
+Tighten the trust set with `--trust-tools=fs_read,fs_write,execute_bash`
+when you don't want full tool access.
 
-## Operation 2 — visual 3-way merge
+## Natural-language to shell
 
 ```bash
-./scripts/kiro-merge.sh <left> <right> <base> <output>
+kiro-cli translate "find every PDF modified in the last week and copy them into /tmp/recent-pdfs/"
 ```
 
-Opens Kiro's GUI merge editor on the four paths. The script blocks via
-`--wait` so the calling agent can act on the result after the user
-saves+closes. **Requires user interaction in the GUI.**
+Use this when the user gives a fuzzy task and a one-liner shell command
+is the right answer. Kiro returns the proposed command for review
+before running.
 
-## Operation 3 — side-by-side diff
+## MCP server registration
 
 ```bash
-kiro -d <fileA> <fileB>
-# add --wait to block until the user closes the window
+# List servers Kiro knows about
+kiro-cli mcp list
+
+# Add a server (same shape as Claude Code's mcp config)
+kiro-cli mcp add my-server --command npx --args "-y @scope/mcp-server"
+
+# Remove
+kiro-cli mcp remove my-server
 ```
 
-## Operation 4 — hand prompt to Kiro chat
+Use when the user wants an MCP server they're using in Claude Code
+available to Kiro chat sessions too.
+
+## Resume a previous session
 
 ```bash
-kiro chat -m <ask|edit|agent> -a <file> "<PROMPT>"
+kiro-cli chat --no-interactive --resume "<follow-up>"             # most recent
+kiro-cli chat --no-interactive --resume-id <SESSION_ID> "<msg>"   # specific
+kiro-cli chat --list-sessions --format json                       # list
 ```
 
-- Default mode is `agent` (full tools)
-- `ask` is read-only Q&A
-- `edit` makes targeted edits
-- `-a` repeats — `-a path1 -a path2 ...` adds files as context
-- stdin: `cat input.txt | kiro chat "Summarize this" -`
+Sessions live in `~/.kiro/sessions/cli/{id}.json` (metadata) and
+`{id}.jsonl` (turns).
 
-Opens (or reuses) a Kiro window. There is **no `--print` / `-p`
-non-interactive output flag** in the current CLI — the response shows in
-the IDE chat panel, not stdout. So this operation is a launcher, not a
-result-fetcher.
+## Model selection
+
+```bash
+kiro-cli chat --list-models --format json   # discover
+kiro-cli chat --no-interactive --model <NAME> "<PROMPT>"
+```
+
+Default model is the user's profile setting. Override when the user
+wants a specific peer model (e.g. AWS Bedrock Claude or Q-family).
 
 ## See also
 
-- [`reference.md`](reference.md) — full CLI flag map + Kiro-specific
-  data paths
-- [`scripts/kiro-add-mcp.sh`](scripts/kiro-add-mcp.sh) — MCP register
-  helper with JSON validation
-- [`scripts/kiro-merge.sh`](scripts/kiro-merge.sh) — 3-way merge wrapper
+- [`reference.md`](reference.md) — full flag map, agent profiles, MCP
+- [`scripts/kiro-chat.sh`](scripts/kiro-chat.sh) — headless wrapper
+- [`scripts/kiro-translate.sh`](scripts/kiro-translate.sh) — NL → shell
+- [`scripts/kiro-preflight.sh`](scripts/kiro-preflight.sh) — readiness

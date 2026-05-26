@@ -10,7 +10,7 @@ names it.
 | Skill | Host | What it does |
 |---|---|---|
 | [`agy-call`](skills/agy-call/) | Claude Code | Google Antigravity — Google Search grounding, image gen, second-opinion review, science DBs |
-| [`kiro-call`](skills/kiro-call/) | Claude Code | AWS Kiro IDE — MCP registry bridge, 3-way merge GUI, diff viewer, IDE chat launcher |
+| [`kiro-call`](skills/kiro-call/) | Claude Code | AWS Kiro CLI (`kiro-cli`) — headless agentic terminal, NL→shell translate, MCP cross-registry, AWS Bedrock peer opinion |
 | [`codex-call`](skills/codex-call/) | Claude Code | OpenAI Codex — highest-quality image gen (`gpt-image-2`), `codex review` |
 | [`notebooklm-call`](skills/notebooklm-call/) | Claude Code + Codex | NotebookLM — document RAG, audio overview, web research import |
 | [`claude-call`](skills/claude-call/) | Codex CLI | Claude Code — 1M-context plan-mode planning, deep code review |
@@ -55,7 +55,7 @@ Each skill also has `skills/<name>/tests/smoke.sh` you can run individually.
 | Skill | Required binary | Auth |
 |---|---|---|
 | `agy-call` | `agy` (Antigravity CLI) | `agy install` then sign in |
-| `kiro-call` | `kiro` (AWS Kiro IDE) | first launch handles sign-in (https://kiro.dev) |
+| `kiro-call` | `kiro-cli` (AWS Kiro CLI) | `kiro-cli login` |
 | `codex-call` | `codex` | `codex login` (ChatGPT) or `OPENAI_API_KEY` |
 | `notebooklm-call` | Python 3.10+, `notebooklm` CLI | `notebooklm login` (browser, one-time) |
 | `claude-call` | `claude` | `claude auth login` or `ANTHROPIC_API_KEY` |

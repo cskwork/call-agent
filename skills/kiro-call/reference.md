@@ -1,75 +1,131 @@
 # kiro-call — Reference
 
-Verified against `kiro --help` v0.12.224.
+Verified against `kiro-cli --help-all` v0.x and `kiro-cli chat --help`.
 
-## Top-level options used by this skill
+## Two distinct kiro binaries
 
-| Flag | Purpose |
+| Path | Role |
 |---|---|
-| `-d, --diff <a> <b>` | Open side-by-side diff |
-| `-m, --merge <p1> <p2> <base> <out>` | Open 3-way merge editor |
-| `-a, --add <folder>` | Add folder to last active window |
-| `-g, --goto <file:line[:col]>` | Open at a specific position |
-| `-n, --new-window` / `-r, --reuse-window` | Window targeting |
-| `-w, --wait` | Block until window closes |
-| `--add-mcp <json>` | Register an MCP server in the user profile |
-| `--profile <name>` | Use a named profile |
-| `-v, --version` | Print version |
-| `--locate-shell-integration-path <shell>` | Print Kiro's shell-integration script path |
+| `/usr/local/bin/kiro` | Kiro **IDE** launcher (`Kiro 0.12.x`). GUI only. Not used by this skill. |
+| `~/.local/bin/kiro-cli` → `/Applications/Kiro CLI.app/...` | Kiro **CLI** — the headless agentic terminal. This skill targets only this. |
 
-## Subcommands
+## Top-level subcommands (used)
 
 | Subcommand | Purpose |
 |---|---|
-| `chat [prompt]` | Open chat session in CWD |
-| `serve-web` | Run editor UI in browsers (requires `kiro-tunnel`) |
-| `tunnel` | Expose this machine via secure tunnel |
+| `chat` | AI assistant in terminal (headline) |
+| `agent` | Manage agent profiles |
+| `mcp` | Add/list/remove MCP servers |
+| `translate` | NL → shell command |
+| `whoami` / `profile` | Auth/account |
+| `doctor` | Diagnostics |
+| `inline` | Shell completion engine |
 
-## `kiro chat` flags
+Subcommands NOT used by this skill: `debug`, `settings`, `setup`,
+`update`, `dashboard`, `integrations`, `login`, `logout`, `launch`,
+`quit`, `restart`, `acp`, `issue`, `theme`.
+
+## `kiro-cli chat` flags
 
 | Flag | Purpose |
 |---|---|
-| `-m, --mode <ask\|edit\|agent\|custom>` | Default: `agent` |
-| `-a, --add-file <path>` | Add file as context (repeatable) |
-| `--maximize` | Maximize chat view |
-| `-r, --reuse-window` / `-n, --new-window` | Window targeting |
-| `--profile <name>` | Use named profile |
+| `[INPUT]` | First question (positional) |
+| `--no-interactive` | Print final response and exit |
+| `-a, --trust-all-tools` | Auto-approve every tool call |
+| `--trust-tools <names>` | Trust only listed tools (comma-separated). Empty = trust none. |
+| `--agent <NAME>` | Use a named agent profile |
+| `--model <NAME>` | Override model |
+| `-r, --resume` | Resume most recent conversation in CWD |
+| `--resume-id <ID>` | Resume specific session |
+| `--resume-picker` | Interactive picker |
+| `-l, --list-sessions` | List saved sessions |
+| `--list-models` | List available models |
+| `-f, --format plain\|json\|json-pretty` | Output format for list cmds |
+| `-d, --delete-session <ID>` | Delete a session |
+| `-w, --wrap always\|never\|auto` | Line wrap behavior |
+| `--require-mcp-startup` | Fail if MCP servers can't start (exit 3) |
+| `--tui` | New TUI mode |
+| `--legacy-ui` / `--classic` | Legacy harness |
 
-stdin: append `-` after the prompt to pipe stdin (`echo X | kiro chat "Summarize" -`).
+## Agent profiles
 
-**Critical:** there is no `--print` / `-p` / `--json` flag — Kiro chat
-opens a GUI window and prints results IN the IDE, not on stdout.
-
-## Data paths
-
-- Binary: `/usr/local/bin/kiro` → `/Applications/Kiro.app/Contents/Resources/app/bin/code`
-- User config / MCP registry: `~/.kiro/` (created by Kiro on first run)
-- Extensions: `~/.kiro/extensions/`
-- Profiles: managed by Kiro internally; named via `--profile`
-
-## MCP JSON shape for `--add-mcp`
+Configs live in `~/.kiro/agents/<name>.json`. Schema (from upstream
+`agent_config.json.example`):
 
 ```json
 {
-  "name": "server-name",
-  "command": "npx",
-  "args": ["-y", "@org/mcp-server"],
-  "env": { "KEY": "VALUE" }
+  "name": "example",
+  "description": "...",
+  "prompt": null,
+  "mcpServers": {},
+  "tools": ["read","write","shell","aws","report","introspect",
+            "knowledge","thinking","todo","delegate","grep","glob"],
+  "toolAliases": {},
+  "allowedTools": [],
+  "resources": [],
+  "hooks": {},
+  "toolsSettings": {},
+  "includeMcpJson": true,
+  "model": null
 }
 ```
 
-`name` and `command` required; `args` and `env` optional. Kiro merges
-into its user-level MCP registry.
+`agent_config.json.example` (with `.example` extension) is NOT loaded;
+rename to `<name>.json` to activate.
 
-## What this skill does NOT use
+## State paths
 
-- `kiro chat` as a result-fetcher (no headless output)
-- `serve-web` / `tunnel` (infrastructure ops, not delegation)
-- Extension install/uninstall (user-managed)
-- `--sync` / telemetry / proposed-API flags
+| Path | Contents |
+|---|---|
+| `~/.kiro/sessions/cli/{id}.json` | Session metadata |
+| `~/.kiro/sessions/cli/{id}.jsonl` | Turn-by-turn transcript |
+| `~/.kiro/sessions/cli/{id}.lock` | Active-session lock |
+| `~/.kiro/agents/` | Agent profile JSONs |
+| `~/.kiro/skills/` | Kiro-side skills (user can install ours here) |
+| `~/.kiro/steering/` | Steering files (system prompts) |
+| `~/.kiro/powers/registries/` | Power (tool) registries |
+| `~/.kiro/settings/` | UI / model defaults |
+| `~/.kiro/.cli_bash_history` | REPL history (readline) |
 
-## Why no L2 round-trip test
+## `kiro-cli mcp`
 
-`kiro chat` returns no stdout — it just opens the IDE chat panel. Any
-"did the prompt work?" check would require GUI inspection. The skill's
-automated tests therefore stop at L1 (syntax + help).
+| Verb | Use |
+|---|---|
+| `mcp list` | List configured MCP servers |
+| `mcp add <name> --command <cmd> --args "<arg1> <arg2>"` | Add server |
+| `mcp remove <name>` | Remove server |
+| `mcp import <file>` | Bulk import from JSON |
+
+Bridge from Claude Code: read `~/.claude.json` (or per-project
+`.claude/settings.json`) `mcpServers` keys and re-emit via `mcp add`.
+
+## `kiro-cli translate`
+
+```bash
+kiro-cli translate "<natural-language request>"
+```
+
+Returns the proposed shell command for the user to review/run.
+
+## Auth
+
+| Command | Effect |
+|---|---|
+| `kiro-cli login` | Browser OAuth |
+| `kiro-cli whoami` | Show current identity |
+| `kiro-cli logout` | Clear creds |
+| `kiro-cli profile` | Show idc user profile |
+
+## Exit codes
+
+`0` ok, `3` MCP startup failure (when `--require-mcp-startup`), nonzero
+otherwise on error.
+
+## Why this skill does NOT use `kiro chat` (the IDE)
+
+`/usr/local/bin/kiro chat <prompt>` opens the **IDE chat panel**. It
+takes a `-m` MODE flag (ask/edit/agent), not a message, and has no
+stdout. The user's pre-existing `~/.kiro/skills/kiro-review/SKILL.md`
+mistakenly uses `kiro chat -m "<message>"` — that interprets the
+message as the mode value and fails silently. This skill targets
+`kiro-cli chat ...` to avoid that pitfall.
