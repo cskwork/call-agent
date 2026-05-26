@@ -17,7 +17,7 @@ planning, parallel git-branch agent fan-out).
 | Skill | Host | Headline gap filled | Explicit triggers |
 |---|---|---|---|
 | `agy-call` | Claude Code | Google Search grounding, image gen, science DB | "agy", "antigravity", "gemini cli" |
-| `kilo-call` | Claude Code | Parallel git-branch agents, non-Anthropic providers, image gen | "kilo", "kilocode" |
+| `kiro-call` | Claude Code | MCP registry bridge, 3-way merge GUI, diff viewer, IDE chat launcher | "kiro" |
 | `codex-call` | Claude Code | High-quality image gen (gpt-image-2), `codex review` | "codex" |
 | `notebooklm-call` | Claude Code + Codex | Document RAG via NotebookLM | "notebooklm", "nblm" |
 | `claude-call` | Codex CLI | Plan-mode planning, deep code review, 1M context | "claude", "claude code" |

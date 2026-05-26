@@ -14,14 +14,14 @@ CODEX_DIR="$HOME/.codex/skills"
 # host targets per skill (newline-separated; macOS bash 3.2 compatible)
 declare_targets() {
   case "$1" in
-    agy-call|kilo-call|codex-call) printf '%s\n' "$CLAUDE_DIR" ;;
+    agy-call|kiro-call|codex-call) printf '%s\n' "$CLAUDE_DIR" ;;
     claude-call)                   printf '%s\n' "$CODEX_DIR"  ;;
     notebooklm-call)               printf '%s\n%s\n' "$CLAUDE_DIR" "$CODEX_DIR" ;;
     *) return 1 ;;
   esac
 }
 
-ALL_SKILLS="agy-call kilo-call codex-call notebooklm-call claude-call"
+ALL_SKILLS="agy-call kiro-call codex-call notebooklm-call claude-call"
 
 DRY=0
 UNINSTALL=0
