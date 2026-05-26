@@ -28,9 +28,16 @@ metadata, status, doctor`
 
 ## State files
 
-- `~/.notebooklm/profiles/<profile>/storage_state.json` — cookies
-- `~/.notebooklm/profiles/<profile>/context.json` — active notebook (do
-  NOT trust in parallel agents)
+Path differs by CLI version:
+
+| Version | Storage path |
+|---|---|
+| **0.3.x** | `~/.notebooklm/storage_state.json` (no `profiles/` dir) |
+| **0.5.x+** | `~/.notebooklm/profiles/<profile>/storage_state.json` |
+
+Other files (both versions): `context.json` (active notebook — do NOT
+trust in parallel agents), `browser_profile/` (Playwright user data dir
+for the persistent Chromium login session).
 
 ## Auth detection (the right way)
 

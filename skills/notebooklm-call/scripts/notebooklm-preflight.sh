@@ -14,33 +14,27 @@ if ! command -v notebooklm >/dev/null; then
 fi
 note "notebooklm: $(command -v notebooklm)"
 
-# 2. python version
-if ! command -v python3 >/dev/null; then
-  fail "python3 not on PATH"; exit 2
-fi
-PY=$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])')
-note "python: $PY"
-python3 - <<'PY' || { fail "Python < 3.10"; exit 2; }
-import sys
-sys.exit(0 if sys.version_info >= (3, 10) else 1)
-PY
+# 2. notebooklm CLI version (warn-only — both 0.3.x and 0.5.x usable)
+VER=$(notebooklm --version 2>&1 | awk '{print $NF}')
+note "version: ${VER:-unknown}"
 
-# 3. playwright + chromium
-if ! python3 -c 'import playwright' 2>/dev/null; then
-  fail "playwright not importable"
-  echo "  Install: pip install 'notebooklm-py[browser]'" >&2
+# 3. storage state exists (path differs across versions)
+HOME_DIR="${NOTEBOOKLM_HOME:-$HOME/.notebooklm}"
+STORAGE=""
+for candidate in \
+  "$HOME_DIR/storage_state.json" \
+  "$HOME_DIR/profiles/default/storage_state.json" \
+  "$HOME_DIR/profiles/$(ls "$HOME_DIR/profiles" 2>/dev/null | head -1)/storage_state.json"; do
+  [ -s "$candidate" ] && { STORAGE="$candidate"; break; }
+done
+if [ -z "$STORAGE" ]; then
+  fail "no storage_state.json found under $HOME_DIR"
+  echo "  Run: notebooklm login" >&2
   exit 2
 fi
-# chromium check is best-effort; don't hard-fail
-python3 -c 'from playwright.sync_api import sync_playwright
-with sync_playwright() as p:
-    bp = p.chromium.executable_path
-    import os, sys
-    sys.exit(0 if bp and os.path.exists(bp) else 3)' 2>/dev/null \
-  && note "playwright chromium ok" \
-  || note "playwright chromium not installed — run: playwright install chromium"
+note "storage: $STORAGE"
 
-# 4. auth — the careful check
+# 4. auth check — verify BOTH status:ok AND token_fetch:true
 AUTH_JSON=$(notebooklm auth check --test --json 2>/dev/null || true)
 if [ -z "$AUTH_JSON" ]; then
   fail "notebooklm auth check returned nothing"
@@ -51,14 +45,15 @@ fi
 if echo "$AUTH_JSON" | python3 -c '
 import sys, json
 try:
-    d = json.load(sys.stdin)
+    d = json.loads(sys.stdin.read())
 except Exception:
     sys.exit(2)
 ok = d.get("status") == "ok" and d.get("checks", {}).get("token_fetch") is True
 sys.exit(0 if ok else 2)'; then
   note "auth ok"
 else
-  fail "auth not valid (token_fetch failed)"
+  TOKEN_FETCH=$(echo "$AUTH_JSON" | python3 -c 'import sys,json; print(json.loads(sys.stdin.read()).get("checks",{}).get("token_fetch"))' 2>/dev/null)
+  fail "auth not valid (token_fetch=$TOKEN_FETCH — session likely expired)"
   echo "  Run: notebooklm login" >&2
   exit 2
 fi

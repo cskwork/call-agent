@@ -42,20 +42,34 @@ if [ "${RUN_L2:-0}" = "1" ] && [ "$HAVE_NB" = "1" ]; then
   fi
 fi
 
-# L3 — actual round-trip ask against a tiny notebook
+# L3 — create + list + delete round-trip (no AI quota cost; verifies real API)
 if [ "${RUN_L3:-0}" = "1" ] && [ "$HAVE_NB" = "1" ]; then
   NB_TITLE="cc-agent-call-smoke-$$"
-  NB_ID=$(notebooklm create "$NB_TITLE" --json 2>/dev/null | python3 -c 'import sys,json;print(json.load(sys.stdin).get("id",""))' || true)
+  CREATE_OUT=$(notebooklm create "$NB_TITLE" --json 2>/dev/null)
+  # CLI versions differ: 0.3.x wraps in {"notebook": {"id": ...}}, newer may not
+  NB_ID=$(echo "$CREATE_OUT" | python3 -c '
+import sys, json
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    sys.exit(0)
+nb = d.get("notebook", d) if isinstance(d, dict) else {}
+print(nb.get("id", "") if isinstance(nb, dict) else "")
+' 2>/dev/null)
+
   if [ -z "$NB_ID" ]; then
-    fail "L3: could not create notebook"
+    fail "L3: could not create notebook (got: $(echo "$CREATE_OUT" | head -c 200))"
   else
-    ANS=$(notebooklm ask --notebook "$NB_ID" "Reply with exactly: OK" 2>/dev/null | tr -d '[:space:]')
-    if echo "$ANS" | grep -qi 'ok'; then
-      note "L3 ok: ask round-trip"
+    if notebooklm list 2>/dev/null | grep -q "$(echo "$NB_ID" | head -c 8)"; then
+      note "L3a ok: notebook $(echo "$NB_ID" | head -c 8)… created and listed"
     else
-      fail "L3: unexpected ask response: $ANS"
+      fail "L3a: created notebook not in list"
     fi
-    notebooklm delete --notebook "$NB_ID" --yes >/dev/null 2>&1 || true
+    if notebooklm delete -n "$NB_ID" -y >/dev/null 2>&1; then
+      note "L3b ok: deleted"
+    else
+      fail "L3b: delete failed (orphan notebook ID: $NB_ID)"
+    fi
   fi
 fi
 
