@@ -1,185 +1,187 @@
 # cc-agent-call
 
-> 한 줄 요약: 사용 중인 AI CLI(예: Claude Code)가 못 하는 일을 다른 AI CLI(Codex, Antigravity, Kiro, NotebookLM)에게 **자동으로 떠넘기게** 해주는 "위임 스킬" 모음입니다.
+[한국어](./README.ko.md) · **English**
+
+> One-line summary: a bundle of "delegation skills" that let the AI CLI you're currently using (e.g. Claude Code) **automatically hand work off** to another AI CLI (Codex, Antigravity, Kiro, NotebookLM) when the other tool is better at it.
 
 ---
 
-## 0. 이 문서를 읽기 전에 — 용어 미리보기
+## 0. Glossary — read this first
 
-처음 보는 단어가 많을 수 있어 먼저 정리합니다.
+A few terms used throughout this README:
 
-| 용어 | 풀어쓰면 |
+| Term | What it means |
 |---|---|
-| **Agentic CLI** | 터미널에서 도는 AI 도구. 사람이 "이거 해줘" 하면 스스로 파일을 읽고/고치고/명령을 실행함. 대표 예: Claude Code, OpenAI Codex CLI, Google Antigravity(`agy`), AWS Kiro CLI(`kiro-cli`). |
-| **Host (호스트)** | 지금 당신이 켜놓고 대화 중인 CLI. 보통 Claude Code 또는 Codex. |
-| **Skill (스킬)** | Claude Code / Codex가 "특정 상황에서 어떻게 행동할지"를 적어둔 폴더. `SKILL.md` 한 장 + 부속 스크립트로 구성. 호스트가 자동으로 발견·로드. |
-| **Delegation (위임)** | 호스트가 직접 처리하지 않고 **다른 CLI를 셸에서 실행**시켜 결과를 받아오는 행동. 이 저장소가 제공하는 핵심 동작. |
-| **MCP** | Model Context Protocol. 여러 AI 도구가 공통으로 외부 서버(파일·DB·웹 등)에 접근하기 위한 규약. `kiro-call`의 cross-registry 기능에서 등장. |
-| **RAG** | Retrieval-Augmented Generation. 모델이 답하기 전에 외부 문서를 먼저 검색해 근거로 사용하는 방식. NotebookLM이 잘하는 일. |
+| **Agentic CLI** | An AI tool that runs in your terminal. When you tell it "do X," it reads files, edits code, and runs commands on its own. Examples: Claude Code, OpenAI Codex CLI, Google Antigravity (`agy`), AWS Kiro CLI (`kiro-cli`). |
+| **Host** | The CLI you have open and are talking to right now. Usually Claude Code or Codex. |
+| **Skill** | A folder containing a `SKILL.md` plus optional scripts. Claude Code / Codex auto-discover skills and load the relevant one based on what you ask. |
+| **Delegation** | Instead of doing the work itself, the host shells out to **another CLI** and returns the result. This is what cc-agent-call enables. |
+| **MCP** | Model Context Protocol — a shared protocol that lets different AI tools talk to the same external servers (files, DBs, web). Comes up in `kiro-call`'s cross-registry feature. |
+| **RAG** | Retrieval-Augmented Generation — the model retrieves source documents first and uses them as grounded evidence. NotebookLM is built around this. |
 
 ---
 
-## 1. 왜 만들었나요?
+## 1. Why does this exist?
 
-요즘 비슷한 시기에 여러 회사가 "내 AI CLI"를 내놓았습니다. 다 똑같아 보이지만 **각자 잘하는 게 다릅니다.**
+Several companies released their own agentic CLIs around the same time. They look similar, but **each is genuinely better at different things**:
 
-- **Claude Code** — 코드 편집·기획·1M 토큰 컨텍스트로 큰 코드베이스 분석에 강함. 이미지 생성은 못 함.
-- **OpenAI Codex CLI** — 이미지 생성(`gpt-image-2`)이 가능하고, `codex review`로 PR 단위 리뷰가 강함.
-- **Google Antigravity (`agy`)** — Google Search를 모델 추론 단계에 끼워주는 grounding 기능, gnomAD/UniProt 같은 과학 DB 직결.
-- **AWS Kiro CLI (`kiro-cli`)** — 헤드리스 자동화에 강하고, "자연어 → 셸 명령" 번역 기능이 있으며, AWS Bedrock 계열 모델로 2차 의견을 받음.
-- **NotebookLM** — PDF·웹·유튜브를 통째로 넣고 정확한 RAG 답변, 오디오 개요 생성.
+- **Claude Code** — Strong at editing code, planning, and analyzing large codebases (1M-token context). Cannot generate images.
+- **OpenAI Codex CLI** — Has image generation (`gpt-image-2`) and a polished `codex review` for PR-level reviews.
+- **Google Antigravity (`agy`)** — Bakes Google Search grounding into the model's reasoning loop; direct access to scientific databases like gnomAD/UniProt.
+- **AWS Kiro CLI (`kiro-cli`)** — Headless agentic terminal, natural-language → shell translation, second opinions from AWS Bedrock models.
+- **NotebookLM** — Drop in PDFs / URLs / YouTube videos and get faithful RAG answers; can produce audio overviews.
 
-이 상황에서 흔히 일어나는 불편:
+The common annoyance:
 
-> "지금 Claude Code로 작업 중인데 다이어그램 이미지가 하나 필요해. 일일이 다른 터미널 열어서 Codex 켜고… 귀찮네."
+> "I'm in the middle of working in Claude Code and I just need one diagram image. Now I have to open another terminal, launch Codex, copy context over… annoying."
 
-**cc-agent-call**은 그 귀찮음을 없앱니다. Claude Code 안에서 "이미지 하나 만들어줘" 라고 하면, Claude Code가 알아서 `codex-call` 스킬을 통해 Codex를 실행해 이미지를 받아옵니다. 사용자는 CLI를 갈아탈 필요가 없습니다.
-
----
-
-## 2. 어떤 경우에 자동으로 호출되나요?
-
-각 스킬은 두 가지 조건 중 하나일 때만 발동합니다. 의도치 않게 외부 CLI가 호출되면 비용·시간 낭비라서 일부러 좁게 잡았습니다.
-
-1. **사용자가 도구 이름을 명시한 경우** — "agy로 검색해줘", "kiro한테 물어봐", "ask codex", "NotebookLM에 넣어줘" 등.
-2. **호스트 CLI가 native로 못 하는 기능을 요청한 경우** — 예: Claude Code 사용 중에 "이 도식 이미지로 그려줘" → Claude Code는 이미지 생성을 못 하므로 `codex-call` 발동.
-
-루틴한 작업(`이 코드 리뷰해줘`, `이 기능 계획 짜줘`)에는 발동하지 않습니다. 호스트 본인이 충분히 잘하기 때문입니다.
+**cc-agent-call** removes that friction. Inside Claude Code you say "generate an image of …" and Claude Code automatically invokes the `codex-call` skill, which shells out to Codex, generates the image, and reports the path back. You never left Claude Code.
 
 ---
 
-## 3. 들어있는 스킬 5개
+## 2. When does a skill auto-fire?
 
-| 스킬 | 어디서 동작? | 어떤 능력을 빌려오나? | 자주 쓰는 사례 |
+Each skill activates only under one of two conditions. This is intentionally narrow to avoid surprise billing and slow round-trips:
+
+1. **You name the target tool explicitly** — "use agy to search …", "ask codex to …", "have NotebookLM read these PDFs", etc.
+2. **You ask for something the host CLI cannot do natively** — e.g. inside Claude Code you ask for image generation → `codex-call` fires because Claude Code has no native image model.
+
+Routine work (`review this code`, `plan this feature`) does **not** trigger delegation. The host is presumed capable.
+
+---
+
+## 3. The 5 skills
+
+| Skill | Runs inside | Borrows the powers of | Typical uses |
 |---|---|---|---|
-| [`agy-call`](skills/agy-call/) | Claude Code | Google Antigravity | 최신 웹 정보 grounding, 이미지 생성, gnomAD/UniProt/PubMed 같은 생명과학 DB 조회, 2차 의견 |
-| [`kiro-call`](skills/kiro-call/) | Claude Code | AWS Kiro CLI(`kiro-cli`) | "이거 하는 셸 명령 알려줘"식 자연어 → 셸 번역, MCP 서버 교차 등록, AWS Bedrock 모델로 2차 의견 |
-| [`codex-call`](skills/codex-call/) | Claude Code | OpenAI Codex | 고품질 이미지 생성(`gpt-image-2`), `codex review`로 명시적 코드 리뷰 |
-| [`notebooklm-call`](skills/notebooklm-call/) | Claude Code + Codex | Google NotebookLM | PDF/URL/YouTube 문서 묶음에 대한 RAG QA, 오디오 개요 |
-| [`claude-call`](skills/claude-call/) | Codex CLI | Claude Code | Codex 사용자가 1M 컨텍스트 기획(plan-mode), 대형 코드베이스 심층 리뷰가 필요할 때 |
+| [`agy-call`](skills/agy-call/) | Claude Code | Google Antigravity | Web-grounded search, image generation, scientific DBs (gnomAD/UniProt/PubMed), second opinion |
+| [`kiro-call`](skills/kiro-call/) | Claude Code | AWS Kiro CLI (`kiro-cli`) | Natural-language → shell translation, MCP cross-registry, second opinion via AWS Bedrock |
+| [`codex-call`](skills/codex-call/) | Claude Code | OpenAI Codex | High-quality image generation (`gpt-image-2`), explicit `codex review` |
+| [`notebooklm-call`](skills/notebooklm-call/) | Claude Code + Codex | Google NotebookLM | RAG over PDF/URL/YouTube corpora, audio overviews |
+| [`claude-call`](skills/claude-call/) | Codex CLI | Claude Code | When a Codex user needs 1M-context plan-mode planning or deep large-codebase review |
 
-> "Host"는 **당신이 현재 켜놓고 대화 중인 CLI**입니다. 예를 들어 `claude-call`은 Codex 사용자가 설치하는 스킬입니다(거꾸로!).
+> "Runs inside" means **the CLI you have open right now**. For example, `claude-call` is installed for Codex users (so they can reach back into Claude Code).
 
-각 스킬 폴더 안 `SKILL.md`를 열어보면 정확한 트리거 키워드와 호출 예시가 적혀 있습니다.
+Open each skill folder's `SKILL.md` to see exact trigger keywords and invocation examples.
 
 ---
 
-## 4. 설치
+## 4. Install
 
-### 4-1. 사전 준비 (스킬마다 다름)
+### 4-1. Per-skill prerequisites
 
-본인이 **실제로 쓸 스킬만** 준비하면 됩니다. 전부 설치할 필요 없음.
+You only need to set up the skills **you actually plan to use**. Not all five.
 
-| 스킬 | 필요한 바이너리 | 인증 방법 |
+| Skill | Required binary | Auth |
 |---|---|---|
-| `agy-call` | `agy` (Antigravity CLI) | `agy install` → Google 계정 로그인 |
+| `agy-call` | `agy` (Antigravity CLI) | `agy install`, then Google sign-in |
 | `kiro-call` | `kiro-cli` (AWS Kiro CLI) | `kiro-cli login` |
-| `codex-call` | `codex` | `codex login` (ChatGPT) 또는 `OPENAI_API_KEY` 환경변수 |
-| `notebooklm-call` | Python 3.10+, `notebooklm` CLI | `notebooklm login` (브라우저 1회) |
-| `claude-call` | `claude` (Claude Code) | `claude auth login` 또는 `ANTHROPIC_API_KEY` 환경변수 |
+| `codex-call` | `codex` | `codex login` (ChatGPT) or `OPENAI_API_KEY` env var |
+| `notebooklm-call` | Python 3.10+, `notebooklm` CLI | `notebooklm login` (browser, one-time) |
+| `claude-call` | `claude` (Claude Code) | `claude auth login` or `ANTHROPIC_API_KEY` env var |
 
-### 4-2. 저장소 클론
+### 4-2. Clone
 
 ```bash
-# GitHub에서
+# from GitHub
 git clone https://github.com/cskwork/cc-agent-call
-# 또는 사내 Gitea에서
+# or from self-hosted Gitea
 git clone https://gitea.agentic-worker.store/Donga-AX/cc-agent-call.git
 
 cd cc-agent-call
 ```
 
-### 4-3. 스킬 심볼릭 링크 생성
+### 4-3. Run the installer
 
-`install.sh`는 이 저장소의 `skills/<name>` 폴더를 호스트 CLI가 보는 위치(`~/.claude/skills/<name>` 또는 `~/.codex/skills/<name>`)로 **symlink** 해줍니다. 복사가 아니라 링크라 저장소를 `git pull` 하면 호스트도 즉시 새 버전을 봅니다.
+`install.sh` creates **symlinks** from this repo's `skills/<name>` into the host CLI's skill directory (`~/.claude/skills/<name>` or `~/.codex/skills/<name>`). Because they're symlinks (not copies), a `git pull` here is immediately visible to the host.
 
 ```bash
-./install.sh                # 5개 전부 설치
-./install.sh agy-call       # 하나만 설치
-./install.sh --dry-run      # 실제로는 안 하고 어디에 무엇이 연결될지만 미리보기
-./install.sh --uninstall    # 만들어둔 symlink 전부 제거
+./install.sh                # install all 5 skills
+./install.sh agy-call       # install just one
+./install.sh --dry-run      # show what would be linked, don't actually link
+./install.sh --uninstall    # remove every symlink this script created
 ```
 
-설치 후 호스트 CLI(Claude Code 등)를 새 세션으로 열면 스킬이 자동 로드됩니다.
+After install, open a fresh session of your host CLI (Claude Code, etc.) and the skill is auto-loaded.
 
-> 참고: `notebooklm-call`은 Claude Code와 Codex 양쪽에서 모두 동작하므로 두 디렉터리 모두에 링크됩니다.
+> Note: `notebooklm-call` works in both Claude Code and Codex, so it gets linked into both directories.
 
 ---
 
-## 5. 처음 써보기 — 5분 워크스루
+## 5. First run — 5-minute walkthrough
 
-상황: **Claude Code로 작업 중인데 README용 일러스트가 필요하다.**
+Scenario: **You're working in Claude Code and you need a hero illustration for a README.**
 
 ```text
-> README 상단에 들어갈 추상적 일러스트 하나 만들어줘. 1:1 비율.
+> Generate an abstract illustration for the top of my README. 1:1 ratio.
 ```
 
-Claude Code는 이미지 생성을 native로 못 합니다. 설치된 `codex-call` 스킬이 트리거되어 다음을 자동 수행합니다:
+Claude Code cannot generate images natively. The installed `codex-call` skill fires and does the following automatically:
 
-1. 프롬프트를 Codex 형식으로 다듬어 셸에서 `codex` 실행
-2. Codex가 `gpt-image-2`로 이미지 생성
-3. 결과 파일 경로를 받아 Claude Code 대화창에 보고
+1. Reshapes your prompt for Codex and shells out to `codex`.
+2. Codex generates the image via `gpt-image-2`.
+3. The resulting file path is returned and reported back in the Claude Code thread.
 
-당신은 CLI를 갈아타지 않았습니다.
+You never switched terminals.
 
-다른 예:
+Other examples:
 
-- "agy로 'gpt-image-2 가격' 검색해줘" → `agy-call`이 Google Search grounding으로 응답
-- "이 PDF 5개에 대해 NotebookLM에 묶고 'Section 3 결론' 물어봐" → `notebooklm-call`이 corpus 생성 후 질의
+- "Have agy search 'gpt-image-2 pricing'" → `agy-call` answers with Google Search grounding.
+- "Bundle these 5 PDFs in NotebookLM and ask about 'the Section 3 conclusion'" → `notebooklm-call` builds the corpus and queries.
 
 ---
 
-## 6. 트리거 정책 상세
+## 6. Why the trigger policy is conservative
 
-각 `SKILL.md`에는 다음과 비슷한 정책이 들어 있습니다:
+Each `SKILL.md` contains a policy block similar to:
 
 > Use ONLY when the user explicitly says "codex" / "kiro" / "agy" / "notebooklm", OR the task is image generation / NL-to-shell / scientific DB / document RAG. Do NOT use for routine code edits, planning, or analysis that the host can do natively.
 
-**왜 이렇게 보수적으로 잡았나?**
+**Why so strict?**
 
-- 외부 CLI 호출은 보통 별도 토큰/크레딧을 소비합니다.
-- 호스트가 스스로 잘하는 일을 굳이 외주 보내면 응답 속도가 느려집니다.
-- 자동 호출이 폭주하면 사용자가 "이 도구가 지금 뭘 하고 있는지" 추적하기 어려워집니다.
+- Calling an external CLI usually spends a separate token / credit balance.
+- Outsourcing work the host already does well makes responses slower.
+- Frequent automatic hand-offs make it hard for you to trace what your tool is actually doing right now.
 
-따라서 "확실히 필요할 때만" 발동하도록 키워드를 좁게 잡았습니다.
+So the keywords are deliberately narrow — delegation fires only when it clearly pays off.
 
 ---
 
-## 7. 테스트
+## 7. Tests
 
-설치 후 동작 확인:
+Sanity-check the install:
 
 ```bash
-./tests/run-all.sh                 # L0 + L1: 바이너리 존재 & --help 동작 확인
-RUN_L2=1 ./tests/run-all.sh        # L2 추가: 실제 round-trip 프롬프트 (크레딧 소모)
-RUN_L3=1 ./tests/run-all.sh        # L3 추가: 핵심 기능(이미지 생성 등) 실행 (크레딧 소모)
+./tests/run-all.sh                 # L0 + L1: binary present, --help works
+RUN_L2=1 ./tests/run-all.sh        # adds L2: real round-trip prompts (uses credits)
+RUN_L3=1 ./tests/run-all.sh        # adds L3: core features (image gen, etc.) (uses credits)
 ```
 
-각 스킬별 개별 스모크 테스트:
+Per-skill smoke tests:
 
 ```bash
 ./skills/agy-call/tests/smoke.sh
 ./skills/codex-call/tests/smoke.sh
-# ... 등
+# ... etc.
 ```
 
-L2/L3은 실제로 외부 모델을 호출하므로 비용이 발생할 수 있습니다. CI에 거는 경우 L0/L1만 켜두는 것을 권장합니다.
+L2 and L3 hit real external models and may incur cost. For CI, leave only L0/L1 enabled.
 
 ---
 
-## 8. 자주 묻는 질문
+## 8. FAQ
 
-**Q. 호스트 CLI를 안 쓰는데 그냥 외부 CLI만 쓰면 안 되나요?**
-됩니다. 이 저장소는 **호스트 안에서 흐름을 끊지 않고 외부 CLI를 부르는 경우**에만 의미가 있습니다. 단독 사용이라면 그냥 해당 CLI를 직접 쓰는 게 빠릅니다.
+**Q. I don't use a host CLI — can't I just use the external CLI directly?**
+Yes. This repo is only useful when you want to **stay inside the host CLI's flow** while occasionally calling out. For standalone use, just run the target CLI directly.
 
-**Q. 스킬이 자동 호출되는 게 싫어요.**
-호스트 CLI 측에서 스킬을 비활성화하거나, `install.sh --uninstall`로 symlink만 제거하면 됩니다. 저장소 자체는 그대로 둬도 무방합니다.
+**Q. I don't want skills auto-firing.**
+Disable the skill in the host CLI's settings, or simply run `./install.sh --uninstall` to drop the symlinks. The repo itself can stay in place.
 
-**Q. 새 CLI(예: 차세대 도구)도 추가할 수 있나요?**
-가능합니다. `skills/<new-name>/SKILL.md`를 만들고 `install.sh`의 `declare_targets()` 케이스에 호스트 위치를 추가하면 됩니다.
+**Q. Can I add a brand-new CLI (e.g. some next-gen tool)?**
+Yes. Create `skills/<new-name>/SKILL.md` and add a case in `install.sh`'s `declare_targets()` mapping it to the right host directory.
 
-**Q. 보안은?**
-이 저장소는 토큰을 보관하지 않습니다. 각 CLI의 인증은 해당 도구의 표준 방식(설정 파일 / 환경변수)을 그대로 사용합니다.
+**Q. What about security?**
+This repo stores no tokens. Each CLI authenticates the standard way for that tool (config file or env var).
 
 ---
 
