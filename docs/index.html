@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>cc-agent-call — Cross-CLI delegation skills</title>
+  <meta name="description" content="Let one agentic CLI (Claude Code or Codex) shell out to another (agy, kiro, codex, NotebookLM, Claude Code) when the target tool has a feature the host lacks." />
+  <meta property="og:title" content="cc-agent-call" />
+  <meta property="og:description" content="Cross-CLI delegation skills: Claude Code / Codex / agy / kiro-cli / NotebookLM. 5 skills, each fully tested." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://cskwork.github.io/cc-agent-call/" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E" />
+  <style>
+    :root{
+      --bg:#0b0d10;
+      --bg-2:#11151a;
+      --panel:#141a21;
+      --line:#1f2731;
+      --line-2:#2a3441;
+      --fg:#e7edf3;
+      --muted:#8a96a6;
+      --accent:#7cf0c4;
+      --accent-2:#9ad1ff;
+      --warn:#ffd479;
+      --pink:#ff9bbd;
+      --mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace;
+      --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent-2);text-decoration:none}
+    a:hover{text-decoration:underline}
+    code,pre,kbd,.mono{font-family:var(--mono)}
+    .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+    /* nav */
+    .nav{position:sticky;top:0;z-index:5;background:rgba(11,13,16,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:.2px}
+    .brand .dot{width:9px;height:9px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent)}
+    .nav a.nav-link{color:var(--muted);margin-left:18px;font-size:14px}
+    .nav a.nav-link:hover{color:var(--fg);text-decoration:none}
+
+    /* hero */
+    .hero{padding:84px 0 56px;border-bottom:1px solid var(--line);background:
+      radial-gradient(800px 320px at 80% -10%, rgba(124,240,196,.08), transparent 60%),
+      radial-gradient(700px 280px at 10% 10%, rgba(154,209,255,.06), transparent 60%)}
+    .eyebrow{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.18em;text-transform:uppercase;margin-bottom:18px}
+    h1{font-size:clamp(34px,5vw,56px);line-height:1.08;margin:0 0 16px;font-weight:700;letter-spacing:-.02em}
+    h1 .grad{background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .lede{max-width:720px;color:#c4ccd6;font-size:18px;margin:0 0 28px}
+    .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border-radius:8px;border:1px solid var(--line-2);font-weight:500;font-size:14px;color:var(--fg);background:var(--panel);transition:border-color .15s,transform .05s}
+    .btn:hover{border-color:var(--accent);text-decoration:none}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{background:linear-gradient(180deg,#0e2a23,#0b1f1a);border-color:#1f5a47;color:var(--accent)}
+    .btn.primary:hover{border-color:var(--accent)}
+    .pill{display:inline-flex;gap:8px;align-items:center;padding:4px 10px;border:1px solid var(--line-2);border-radius:999px;font-size:12px;color:var(--muted);font-family:var(--mono)}
+    .pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:28px}
+
+    /* terminal */
+    .terminal{margin-top:36px;background:#0a0e13;border:1px solid var(--line-2);border-radius:12px;overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+    .terminal .tbar{display:flex;align-items:center;gap:6px;padding:10px 14px;background:#0f141a;border-bottom:1px solid var(--line)}
+    .terminal .tbar .b{width:11px;height:11px;border-radius:50%}
+    .b.r{background:#ff5f57}.b.y{background:#febc2e}.b.g{background:#28c840}
+    .terminal .tbar .title{margin-left:10px;color:var(--muted);font-family:var(--mono);font-size:12px}
+    .terminal pre{margin:0;padding:18px 20px;font-size:13.5px;line-height:1.7;overflow:auto;color:#d7dee6}
+    .terminal .p{color:var(--accent)}
+    .terminal .c{color:var(--muted)}
+    .terminal .k{color:var(--accent-2)}
+    .terminal .s{color:var(--warn)}
+
+    /* sections */
+    section{padding:72px 0;border-bottom:1px solid var(--line)}
+    h2{font-size:28px;margin:0 0 8px;letter-spacing:-.01em}
+    .sub{color:var(--muted);margin:0 0 32px}
+
+    /* skills grid */
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+    .card{background:linear-gradient(180deg,var(--panel),var(--bg-2));border:1px solid var(--line);border-radius:12px;padding:22px;transition:border-color .15s,transform .15s}
+    .card:hover{border-color:var(--line-2);transform:translateY(-2px)}
+    .card .row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .card h3{margin:0;font-size:17px;font-family:var(--mono)}
+    .card h3 a{color:var(--fg)}
+    .badge{font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid var(--line-2);color:var(--muted)}
+    .badge.cc{color:var(--accent);border-color:#1f5a47}
+    .badge.cx{color:var(--pink);border-color:#5a2a3a}
+    .badge.both{color:var(--accent-2);border-color:#234766}
+    .card p{margin:0;color:#c4ccd6;font-size:14.5px}
+
+    /* prereq table */
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--line)}
+    tbody tr:last-child td{border-bottom:0}
+    th{color:var(--muted);font-weight:500;font-size:12px;letter-spacing:.06em;text-transform:uppercase;background:#10151b}
+    td code{background:#0c1117;border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-size:12.5px;color:var(--accent)}
+
+    /* policy */
+    .policy{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+    .policy .card h3{font-family:var(--sans);font-size:16px;margin-bottom:8px}
+    .policy .card p{font-size:14.5px}
+
+    /* footer */
+    footer{padding:40px 0 60px;color:var(--muted);font-size:13.5px}
+    footer .row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+    @media (max-width:640px){
+      .hero{padding:60px 0 40px}
+      section{padding:56px 0}
+      .nav a.nav-link{margin-left:12px}
+    }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <div class="brand"><span class="dot"></span><span class="mono">cc-agent-call</span></div>
+      <nav>
+        <a class="nav-link" href="#skills">Skills</a>
+        <a class="nav-link" href="#install">Install</a>
+        <a class="nav-link" href="#prereq">Prerequisites</a>
+        <a class="nav-link" href="https://github.com/cskwork/cc-agent-call">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow">// cross-cli delegation skills</div>
+      <h1>One agentic CLI, <span class="grad">five tools at its back.</span></h1>
+      <p class="lede">
+        Let Claude Code or Codex shell out to <b>agy</b>, <b>kiro-cli</b>, <b>codex</b>,
+        <b>NotebookLM</b>, or <b>Claude Code</b> when the target tool has a feature
+        the host lacks — or when the user explicitly names it.
+      </p>
+      <div class="cta">
+        <a class="btn primary" href="#install">Install</a>
+        <a class="btn" href="https://github.com/cskwork/cc-agent-call">View on GitHub</a>
+        <a class="btn" href="#skills">See skills</a>
+      </div>
+      <div class="pills">
+        <span class="pill">5 skills</span>
+        <span class="pill">Claude Code + Codex hosts</span>
+        <span class="pill">MIT licensed</span>
+        <span class="pill">L0 / L1 / L2 / L3 tests</span>
+      </div>
+
+      <div class="terminal" aria-hidden="true">
+        <div class="tbar"><span class="b r"></span><span class="b y"></span><span class="b g"></span><span class="title">~/cc-agent-call</span></div>
+<pre><span class="c"># clone + install all skills</span>
+<span class="p">$</span> <span class="k">git</span> clone https://github.com/cskwork/cc-agent-call
+<span class="p">$</span> <span class="k">cd</span> cc-agent-call
+<span class="p">$</span> ./install.sh
+<span class="c">→ linked agy-call       → ~/.claude/skills/agy-call</span>
+<span class="c">→ linked kiro-call      → ~/.claude/skills/kiro-call</span>
+<span class="c">→ linked codex-call     → ~/.claude/skills/codex-call</span>
+<span class="c">→ linked notebooklm-call → ~/.claude/skills + ~/.codex/skills</span>
+<span class="c">→ linked claude-call    → ~/.codex/skills/claude-call</span>
+<span class="p">$</span> <span class="k">claude</span> <span class="s">"use agy to generate a logo for this README"</span>
+</pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="wrap">
+      <h2>Skills</h2>
+      <p class="sub">Each skill is a SKILL.md file that the host CLI auto-discovers. Symlinked, not vendored.</p>
+      <div class="grid">
+
+        <div class="card">
+          <div class="row">
+            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/agy-call">agy-call</a></h3>
+            <span class="badge cc">Claude Code</span>
+          </div>
+          <p>Google Antigravity — Google Search grounding, image generation, second-opinion review, scientific databases (gnomAD, UniProt, PubMed).</p>
+        </div>
+
+        <div class="card">
+          <div class="row">
+            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/kiro-call">kiro-call</a></h3>
+            <span class="badge cc">Claude Code</span>
+          </div>
+          <p>AWS Kiro CLI — headless agentic terminal, natural-language → shell translation, MCP cross-registry, AWS Bedrock peer opinion.</p>
+        </div>
+
+        <div class="card">
+          <div class="row">
+            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/codex-call">codex-call</a></h3>
+            <span class="badge cc">Claude Code</span>
+          </div>
+          <p>OpenAI Codex — highest-quality image generation via <code>gpt-image-2</code>, plus one-shot <code>codex review</code> for an outside take on a diff.</p>
+        </div>
+
+        <div class="card">
+          <div class="row">
+            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/notebooklm-call">notebooklm-call</a></h3>
+            <span class="badge both">Claude Code + Codex</span>
+          </div>
+          <p>NotebookLM — document RAG over PDFs/URLs/YouTube, audio overview generation, and bulk web research import.</p>
+        </div>
+
+        <div class="card">
+          <div class="row">
+            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/claude-call">claude-call</a></h3>
+            <span class="badge cx">Codex CLI</span>
+          </div>
+          <p>Claude Code — 1M-context plan-mode planning and deep code review delegated from inside Codex.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="wrap">
+      <h2>Install</h2>
+      <p class="sub"><code>install.sh</code> symlinks each skill into the right host directory. No duplication, no global state.</p>
+      <div class="terminal">
+        <div class="tbar"><span class="b r"></span><span class="b y"></span><span class="b g"></span><span class="title">install</span></div>
+<pre><span class="p">$</span> ./install.sh                 <span class="c"># link all skills</span>
+<span class="p">$</span> ./install.sh agy-call        <span class="c"># link one skill</span>
+<span class="p">$</span> ./install.sh --dry-run       <span class="c"># preview what would be linked</span>
+
+<span class="c"># Targets:</span>
+<span class="c">#   Claude-Code skills → ~/.claude/skills/&lt;name&gt;</span>
+<span class="c">#   Codex skills       → ~/.codex/skills/&lt;name&gt;</span>
+<span class="c">#   notebooklm-call    → linked into both</span>
+</pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="policy">
+    <div class="wrap">
+      <h2>Trigger policy</h2>
+      <p class="sub">Each SKILL.md is configured so the host CLI invokes it only when one of the two conditions is true. No routine hijacking.</p>
+      <div class="policy">
+        <div class="card">
+          <h3>① Explicit name</h3>
+          <p>The user names the target tool — <i>"use agy"</i>, <i>"ask codex"</i>, <i>"with NotebookLM"</i>. Intent is unambiguous, so dispatch.</p>
+        </div>
+        <div class="card">
+          <h3>② Capability gap</h3>
+          <p>The user asks for something the host CLI cannot do natively — image generation for Claude Code, 1M-context planning for Codex, document RAG, Google Search grounding.</p>
+        </div>
+        <div class="card">
+          <h3>What it doesn't do</h3>
+          <p>It does not hijack <i>"review this code"</i> or <i>"plan this feature"</i>. The host CLI is presumed capable; delegation is the exception, not the default.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="prereq">
+    <div class="wrap">
+      <h2>Prerequisites</h2>
+      <p class="sub">Each skill is a thin wrapper. The underlying CLI must be installed and authenticated.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Skill</th><th>Required binary</th><th>Auth</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>agy-call</code></td><td><code>agy</code></td><td><code>agy install</code> then sign in</td></tr>
+            <tr><td><code>kiro-call</code></td><td><code>kiro-cli</code></td><td><code>kiro-cli login</code></td></tr>
+            <tr><td><code>codex-call</code></td><td><code>codex</code></td><td><code>codex login</code> or <code>OPENAI_API_KEY</code></td></tr>
+            <tr><td><code>notebooklm-call</code></td><td>Python 3.10+, <code>notebooklm</code></td><td><code>notebooklm login</code> (browser, one-time)</td></tr>
+            <tr><td><code>claude-call</code></td><td><code>claude</code></td><td><code>claude auth login</code> or <code>ANTHROPIC_API_KEY</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="tests">
+    <div class="wrap">
+      <h2>Tests</h2>
+      <p class="sub">Four levels, opt in to higher levels with env flags so you don't burn API credit by default.</p>
+      <div class="terminal">
+        <div class="tbar"><span class="b r"></span><span class="b y"></span><span class="b g"></span><span class="title">tests</span></div>
+<pre><span class="p">$</span> ./tests/run-all.sh                 <span class="c"># L0 + L1: binary present, help works</span>
+<span class="p">$</span> RUN_L2=1 ./tests/run-all.sh        <span class="c"># adds round-trip prompts (uses credit)</span>
+<span class="p">$</span> RUN_L3=1 ./tests/run-all.sh        <span class="c"># adds feature exercises (image gen etc.)</span>
+
+<span class="c"># Each skill also has its own smoke test:</span>
+<span class="p">$</span> ./skills/agy-call/tests/smoke.sh
+</pre>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap row">
+      <div>MIT License · Built by <a href="https://github.com/cskwork">@cskwork</a></div>
+      <div><a href="https://github.com/cskwork/cc-agent-call">github.com/cskwork/cc-agent-call</a></div>
+    </div>
+  </footer>
+</body>
+</html>
