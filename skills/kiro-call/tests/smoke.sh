@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# kiro-call smoke test — only L0+L1 (kiro is a GUI launcher with no
-# headless output; round-trip tests would require GUI inspection)
+# kiro-call smoke test — targets kiro-cli (the AWS agentic terminal).
 set -u
 
 SKILL=kiro-call
@@ -10,46 +9,64 @@ fail() { printf '[%s] FAIL: %s\n' "$SKILL" "$*" >&2; FAIL=1; }
 
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-# L0 — binary present
-if command -v kiro >/dev/null 2>&1; then
-  V=$(kiro --version 2>&1 | head -1)
-  note "L0 ok: kiro $V"
+# L0 — binary present and is the CLI (not the IDE launcher)
+if command -v kiro-cli >/dev/null 2>&1; then
+  V=$(kiro-cli --version 2>&1 | head -1)
+  case "$V" in
+    *Kiro*0.12*)
+      fail "L0: 'kiro-cli' on PATH points to the IDE, not the CLI"
+      exit "$FAIL"
+      ;;
+  esac
+  note "L0 ok: kiro-cli $V"
 else
-  fail "L0: kiro not on PATH (install from https://kiro.dev)"
+  fail "L0: kiro-cli not on PATH (install Kiro CLI from https://kiro.dev)"
   exit "$FAIL"
 fi
 
-# L1a — help works
-if kiro --help >/dev/null 2>&1; then
-  note "L1a ok: kiro --help"
-else
-  fail "L1a: kiro --help failed"
-fi
-if kiro chat --help >/dev/null 2>&1; then
-  note "L1b ok: kiro chat --help"
-else
-  fail "L1b: kiro chat --help failed"
-fi
-
-# L1c — wrapper scripts syntax-valid
-for s in scripts/kiro-add-mcp.sh scripts/kiro-merge.sh; do
-  if bash -n "$SCRIPT_DIR/$s"; then
-    note "L1c ok: $s syntax"
+# L1 — helps work, scripts syntax-valid
+for help in '--help' '--help-all' 'chat --help' 'translate --help' 'mcp --help'; do
+  if kiro-cli $help >/dev/null 2>&1; then
+    note "L1a ok: kiro-cli $help"
   else
-    fail "L1c: $s syntax error"
+    fail "L1a: kiro-cli $help failed"
+  fi
+done
+for s in scripts/kiro-preflight.sh scripts/kiro-chat.sh scripts/kiro-translate.sh; do
+  if bash -n "$SCRIPT_DIR/$s"; then
+    note "L1b ok: $s syntax"
+  else
+    fail "L1b: $s syntax error"
   fi
 done
 
-# L1d — kiro-add-mcp.sh validates JSON without invoking kiro
-# (use a bad payload that would fail validation before the kiro call)
-BAD_OUT=$("$SCRIPT_DIR/scripts/kiro-add-mcp.sh" '{"name":"x"}' 2>&1 || true)
-if echo "$BAD_OUT" | grep -q "missing required keys"; then
-  note "L1d ok: kiro-add-mcp validates payload shape"
+# L1c — preflight (may exit 2 if not logged in)
+if "$SCRIPT_DIR/scripts/kiro-preflight.sh" >/dev/null 2>&1; then
+  note "L1c ok: preflight passed (auth present)"
+  HAVE_AUTH=1
 else
-  fail "L1d: kiro-add-mcp accepted bad payload: $BAD_OUT"
+  note "L1c warn: preflight reports no auth — run \`kiro-cli login\`"
+  HAVE_AUTH=0
 fi
 
-# L2/L3 deliberately skipped — kiro CLI has no headless mode.
-# Manual verification recipes are in reference.md.
+# L2 — headless round-trip
+if [ "${RUN_L2:-0}" = "1" ] && [ "$HAVE_AUTH" = "1" ]; then
+  OUT=$("$SCRIPT_DIR/scripts/kiro-chat.sh" "Reply with exactly: OK" 2>&1 | tr -d '[:space:]')
+  if echo "$OUT" | grep -qi 'ok'; then
+    note "L2 ok: round-trip"
+  else
+    fail "L2: unexpected response: $(echo "$OUT" | head -c 200)"
+  fi
+fi
+
+# L3 — translate
+if [ "${RUN_L3:-0}" = "1" ] && [ "$HAVE_AUTH" = "1" ]; then
+  T=$("$SCRIPT_DIR/scripts/kiro-translate.sh" "list files in current directory" 2>&1 | head -20)
+  if echo "$T" | grep -qE '\bls\b|ls -'; then
+    note "L3 ok: translate produced an ls command"
+  else
+    fail "L3: translate output did not include 'ls': $T"
+  fi
+fi
 
 exit "$FAIL"
