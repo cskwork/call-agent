@@ -36,7 +36,7 @@ python "$HOME/.codex/skills/.system/imagegen/scripts/image_gen.py" generate-batc
   --input /tmp/jobs.jsonl --concurrency 4
 ```
 
-## Pattern 4 — `codex review` for diff scoping
+## Pattern 4 — `codex review` for diff scoping (async-backed)
 
 ```bash
 # Review only uncommitted changes
@@ -47,10 +47,20 @@ python "$HOME/.codex/skills/.system/imagegen/scripts/image_gen.py" generate-batc
 
 # Review a single commit
 ./scripts/codex-review.sh --commit abc1234
+
+# Bound how long the caller blocks (job keeps running if it outlasts this)
+./scripts/codex-review.sh --wait 300 --base main
 ```
 
 Use this when you want a fresh model's read on the same diff Claude just
-produced.
+produced. The script runs `codex review` as a detached async job and blocks
+only up to `--wait` seconds — a slow review never turns into an indefinite
+hang. If it outlasts the cap, poll/stop it:
+
+```bash
+./scripts/codex-async.sh result "$JOB"   # the review markdown, once done
+./scripts/codex-async.sh stop   "$JOB"   # cancel — targeted kill, no pkill
+```
 
 ## Pattern 5 — Structured output (planning artifacts)
 
@@ -89,16 +99,23 @@ JOB=$("$A" start "Audit this repo for N+1 queries and write findings" \
 # 3. Collect the final assistant message once finished
 "$A" result "$JOB"
 
-# 4. Continue the SAME session (keeps prior context)
+# 4. Cancel a runaway job (targeted pid kill + its children; never pkill -f)
+"$A" stop   "$JOB"
+
+# 5. Continue the SAME session (keeps prior context)
 "$A" resume "$JOB" "Now propose a fix for the worst offender"
 ```
 
 Why a wrapper and not a bare `&`: it captures the codex `thread_id` (for
 `resume`), records the real exit code so `status` never guesses, writes
-the final message to a file you can read later, and applies an optional
-hard `--timeout` (codex has no native one). Jobs live under
-`~/.codex/async-jobs/` (override with `CODEX_ASYNC_HOME`) so you can poll
-them from any later turn; they do not survive a host reboot.
+the final message to a file you can read later, applies an optional hard
+`--timeout` (codex has no native one), and exposes a `stop` that kills by
+recorded pid instead of a broad `pkill -f` pattern sweep (the kind that
+hits a permission prompt). Jobs live under `~/.codex/async-jobs/` (override
+with `CODEX_ASYNC_HOME`) so you can poll them from any later turn; they do
+not survive a host reboot.
+
+`start-review` runs `codex review` through this same machinery (Pattern 4).
 
 ## Anti-patterns
 

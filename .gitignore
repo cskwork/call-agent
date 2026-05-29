@@ -1,6 +1,8 @@
 .DS_Store
 *.swp
 *.tmp
+.env
+.env.*
 /.claude/settings.local.json
 /.antigravitycli/
 /.kilocode/
