@@ -78,10 +78,28 @@ cannot.
 ./scripts/codex-review.sh                            # review uncommitted
 ./scripts/codex-review.sh --base main                # diff vs branch
 ./scripts/codex-review.sh --commit <SHA>             # one commit
-./scripts/codex-review.sh --uncommitted --strict     # extra rigor
+./scripts/codex-review.sh "Focus on security"        # uncommitted + custom instructions
+./scripts/codex-review.sh --wait 300 --base main     # block at most 300s
+./scripts/codex-review.sh --timeout 30m              # hard-kill codex after 30m
 ```
 
-Underlying: `codex review` with mutually exclusive scope flags.
+Note: codex 0.135.0 forbids a scope flag together with a free-text prompt —
+pass one or the other (a bare prompt reviews the uncommitted diff).
+
+Underlying: `codex review` (mutually exclusive scope flags) is launched as a
+**detached async job** (`codex-async.sh start-review`); the call then blocks up
+to `--wait` seconds (default 540) for the result. A review that outlasts the cap
+keeps running detached — you poll/stop it instead of the call hanging forever:
+
+```bash
+./scripts/codex-async.sh status "$JOB"   # running | done rc=0 | timeout
+./scripts/codex-async.sh result "$JOB"   # the review markdown, once done
+./scripts/codex-async.sh stop   "$JOB"   # cancel (targeted kill, never pkill)
+```
+
+`--timeout` (hard codex-process kill) is OFF by default so long, legitimate
+reviews are not cut short; set it only as a safety net. The host Bash tool caps
+one call at 10m, so keep `--wait` under 600 and re-issue `wait` for longer runs.
 
 ## One-shot non-interactive prompt
 
@@ -109,8 +127,13 @@ JOB=$(./scripts/codex-async.sh start "<LONG TASK>" --sandbox read-only --timeout
 ./scripts/codex-async.sh status "$JOB"     # running | done rc=0 | timeout
 ./scripts/codex-async.sh wait   "$JOB" 600 # block until done (cap 600s)
 ./scripts/codex-async.sh result "$JOB"     # final message once finished
+./scripts/codex-async.sh stop   "$JOB"     # cancel a runaway job (targeted kill)
 ./scripts/codex-async.sh resume "$JOB" "<FOLLOW-UP>"  # continue same session
 ```
+
+`start-review` is the same machinery for `codex review` (see Code review above).
+`stop` terminates by the recorded pid + its children — never `pkill -f`, so it
+does not trip the broad-kill permission prompt.
 
 The job is a temp dir; poll it from any later turn. See `patterns.md`
 Pattern 6 for the full recipe.

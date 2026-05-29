@@ -35,7 +35,13 @@ Scope (mutually exclusive):
 | `--commit SHA` | one commit |
 | `--title TITLE` | label for the review |
 
-No `--json` flag here — output is markdown.
+No `--json` flag here — output is markdown (printed to stdout; no `-o`).
+
+**codex 0.135.0:** a scope flag (`--uncommitted`/`--base`/`--commit`) and a
+free-text `[PROMPT]` are MUTUALLY EXCLUSIVE — passing both errors with
+`the argument '--<scope>' cannot be used with '[PROMPT]'`. A bare prompt
+reviews the uncommitted diff by default. `scripts/codex-review.sh` enforces
+this (pass one or the other).
 
 ## Image generation (built-in)
 
