@@ -68,6 +68,38 @@ codex exec --sandbox read-only --skip-git-repo-check \
   "Plan migration from X to Y; respond per schema."
 ```
 
+## Pattern 6 — Long-running / async job (don't block the host)
+
+`codex exec` is synchronous: a multi-minute job blocks the host CLI until
+it returns. When you want to **fire a long task, keep working, and collect
+the answer once it finishes**, use the async wrapper instead of inlining
+`codex exec ... &`.
+
+```bash
+A=./scripts/codex-async.sh
+
+# 1. Start — returns a JOB_DIR immediately, runs codex in the background
+JOB=$("$A" start "Audit this repo for N+1 queries and write findings" \
+        --cd "$PWD" --sandbox read-only --timeout 10m)
+
+# 2. Do other work here... then poll (non-blocking) or block with a cap
+"$A" status "$JOB"        # running | done rc=0 | timeout | missing
+"$A" wait   "$JOB" 600    # block until done, or until 600s elapse
+
+# 3. Collect the final assistant message once finished
+"$A" result "$JOB"
+
+# 4. Continue the SAME session (keeps prior context)
+"$A" resume "$JOB" "Now propose a fix for the worst offender"
+```
+
+Why a wrapper and not a bare `&`: it captures the codex `thread_id` (for
+`resume`), records the real exit code so `status` never guesses, writes
+the final message to a file you can read later, and applies an optional
+hard `--timeout` (codex has no native one). Jobs live under
+`~/.codex/async-jobs/` (override with `CODEX_ASYNC_HOME`) so you can poll
+them from any later turn; they do not survive a host reboot.
+
 ## Anti-patterns
 
 - Using Codex for image gen when the user did NOT ask for an image —

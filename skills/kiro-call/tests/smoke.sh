@@ -20,8 +20,8 @@ if command -v kiro-cli >/dev/null 2>&1; then
   esac
   note "L0 ok: kiro-cli $V"
 else
-  fail "L0: kiro-cli not on PATH (install Kiro CLI from https://kiro.dev)"
-  exit "$FAIL"
+  note "L0 skip: kiro-cli not on PATH (install Kiro CLI from https://kiro.dev)"
+  exit 3
 fi
 
 # L1 — helps work, scripts syntax-valid

@@ -155,7 +155,12 @@ Sanity-check the install:
 ./tests/run-all.sh                 # L0 + L1: binary present, --help works
 RUN_L2=1 ./tests/run-all.sh        # adds L2: real round-trip prompts (uses credits)
 RUN_L3=1 ./tests/run-all.sh        # adds L3: core features (image gen, etc.) (uses credits)
+RUN_L4=1 ./tests/run-all.sh        # adds L4: long-running async jobs (codex-call) (uses credits)
 ```
+
+A skill whose CLI isn't installed is reported as **SKIP**, not FAIL — so a
+partial install (e.g. only `codex` + `claude`) still ends in `RESULT: OK`.
+The suite only fails on a real error.
 
 Per-skill smoke tests:
 
