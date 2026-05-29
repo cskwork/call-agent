@@ -73,4 +73,11 @@ print(nb.get("id", "") if isinstance(nb, dict) else "")
   fi
 fi
 
-exit "$FAIL"
+# Real failure wins; otherwise report SKIP (exit 3) when the CLI is absent.
+if [ "$FAIL" != "0" ]; then
+  exit "$FAIL"
+elif [ "$HAVE_NB" != "1" ]; then
+  note "L0 skip: notebooklm not installed — pip install 'notebooklm-py[browser]'"
+  exit 3
+fi
+exit 0

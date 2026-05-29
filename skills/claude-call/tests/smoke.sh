@@ -15,8 +15,8 @@ if command -v claude >/dev/null 2>&1; then
   V=$(claude --version 2>&1 | head -1)
   note "L0 ok: claude $V"
 else
-  fail "L0: claude not on PATH"
-  exit "$FAIL"
+  note "L0 skip: claude not on PATH"
+  exit 3
 fi
 
 # L1 — wrapper scripts syntax-valid + help works

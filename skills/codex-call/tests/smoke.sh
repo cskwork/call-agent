@@ -12,8 +12,8 @@ if command -v codex >/dev/null 2>&1; then
   V=$(codex --version 2>&1 | head -1)
   note "L0 ok: codex $V"
 else
-  fail "L0: codex not on PATH"
-  exit "$FAIL"
+  note "L0 skip: codex not on PATH — install to test"
+  exit 3
 fi
 
 # L1 — help works + auth detected + scripts syntax-valid
@@ -30,7 +30,7 @@ else
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-for s in scripts/codex-imagegen.sh scripts/codex-review.sh; do
+for s in scripts/codex-imagegen.sh scripts/codex-review.sh scripts/codex-async.sh; do
   if bash -n "$SCRIPT_DIR/$s"; then
     note "L1c ok: $s syntax"
   else
@@ -65,6 +65,32 @@ if [ "${RUN_L3:-0}" = "1" ]; then
   else
     fail "L3: no image at $IMG"
   fi
+fi
+
+# L4 — long-running async job on the DEFAULT (no --timeout) path: this is the
+# one that crashes on bash 3.2 if the empty-array expansion regresses, so we
+# capture start's stderr and assert no shell crash, then poll to done.
+if [ "${RUN_L4:-0}" = "1" ]; then
+  ASYNC="$SCRIPT_DIR/scripts/codex-async.sh"
+  AERR=$(mktemp -t codex-l4-err-XXXXXX)
+  JOB=$("$ASYNC" start \
+        "Reply on the final line with exactly: L4-ASYNC-OK" \
+        --sandbox read-only 2>"$AERR")
+  if grep -qi 'unbound variable' "$AERR"; then
+    fail "L4: codex-async.sh start crashed: $(cat "$AERR")"
+  elif [ -n "$JOB" ] && [ -d "$JOB" ]; then
+    "$ASYNC" wait "$JOB" 240 >/dev/null 2>&1
+    ST=$("$ASYNC" status "$JOB")
+    if [ "$ST" = "done rc=0" ] && "$ASYNC" result "$JOB" 2>/dev/null | grep -q 'L4-ASYNC-OK'; then
+      note "L4 ok: async (no-timeout) start/poll/result round-trip"
+    else
+      fail "L4: async did not finish cleanly (status: $ST)"
+    fi
+    rm -rf "$JOB"
+  else
+    fail "L4: codex-async.sh start did not return a job dir"
+  fi
+  rm -f "$AERR"
 fi
 
 exit "$FAIL"

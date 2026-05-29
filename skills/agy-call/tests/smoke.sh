@@ -13,8 +13,8 @@ if command -v agy >/dev/null 2>&1; then
   V=$(agy --version 2>&1 | head -1)
   note "L0 ok: agy $V"
 else
-  fail "L0: agy not on PATH (install from https://antigravity.google/cli)"
-  exit "$FAIL"
+  note "L0 skip: agy not on PATH (install from https://antigravity.google/cli)"
+  exit 3
 fi
 
 # L1 — help works

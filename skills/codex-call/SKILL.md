@@ -98,9 +98,27 @@ Output flags:
 - `--json` — JSONL event stream
 - `--output-schema FILE` — JSON Schema constrains final response
 
+## Long-running / async jobs (don't block the host)
+
+`codex exec` is synchronous — a multi-minute task blocks Claude Code until
+it returns. For a long job you want to start now and collect later, use the
+async wrapper:
+
+```bash
+JOB=$(./scripts/codex-async.sh start "<LONG TASK>" --sandbox read-only --timeout 10m)
+./scripts/codex-async.sh status "$JOB"     # running | done rc=0 | timeout
+./scripts/codex-async.sh wait   "$JOB" 600 # block until done (cap 600s)
+./scripts/codex-async.sh result "$JOB"     # final message once finished
+./scripts/codex-async.sh resume "$JOB" "<FOLLOW-UP>"  # continue same session
+```
+
+The job is a temp dir; poll it from any later turn. See `patterns.md`
+Pattern 6 for the full recipe.
+
 ## See also
 
 - [`patterns.md`](patterns.md)
 - [`reference.md`](reference.md)
 - [`scripts/codex-imagegen.sh`](scripts/codex-imagegen.sh)
 - [`scripts/codex-review.sh`](scripts/codex-review.sh)
+- [`scripts/codex-async.sh`](scripts/codex-async.sh)
