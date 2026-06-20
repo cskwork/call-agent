@@ -82,6 +82,22 @@
 
 ## 4. 설치
 
+### 4-0. 빠른 설치 (글로벌, 한 줄)
+
+스킬을 코딩 에이전트의 **글로벌** 스킬 폴더에 한 번에 클론·링크:
+
+```bash
+git clone https://github.com/cskwork/call-agent && ./call-agent/install.sh
+```
+
+`call-agent`를 `~/.claude/skills`와 `~/.codex/skills` **양쪽**(있는 곳)에 symlink 하므로, 어느 프로젝트에서 Claude Code/Codex를 켜든 자동 로드됩니다. 새 세션만 열면 끝.
+
+**에이전트한테 시키고 싶다면?** Claude Code나 Codex에 이 프롬프트를 붙여넣으세요:
+
+> https://github.com/cskwork/call-agent 를 클론하고 `install.sh`를 실행해서 `call-agent` 스킬을 내 글로벌 `~/.claude/skills`와 `~/.codex/skills`에 설치해줘. 그리고 스킬이 인식되는지 확인해줘.
+
+타깃별 제어(dry-run, 제거, 사전 준비)는 아래 4-1 → 4-3 참고.
+
 ### 4-1. 사전 준비 (타깃마다 다름)
 
 본인이 **실제로 쓸 타깃만** 준비하면 됩니다. 전부 설치할 필요 없음.

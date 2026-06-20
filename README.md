@@ -82,6 +82,22 @@ Each target's exact invocation, flags, and wrapper scripts live in `skills/call-
 
 ## 4. Install
 
+### 4-0. Quick install (global, one command)
+
+Clone and link the skill into your coding agents' **global** skill dirs in one go:
+
+```bash
+git clone https://github.com/cskwork/call-agent && ./call-agent/install.sh
+```
+
+That symlinks `call-agent` into **both** `~/.claude/skills` and `~/.codex/skills` (whichever exist) — so any Claude Code or Codex session, in any project, auto-loads it. Open a fresh session and you're done.
+
+**Prefer to let the agent install it?** Paste this into Claude Code or Codex:
+
+> Clone https://github.com/cskwork/call-agent and run its `install.sh` to install the `call-agent` skill into my global `~/.claude/skills` and `~/.codex/skills`, then confirm the skill is discoverable.
+
+Need per-target control (dry-run, uninstall, prerequisites)? See 4-1 → 4-3 below.
+
 ### 4-1. Per-target prerequisites
 
 You only need to set up the targets **you actually plan to use**. Not all of them.
