@@ -28,6 +28,8 @@ OUT_JSON=$(claude -p --print \
 echo "$OUT_JSON" | python3 -c '
 import sys, json
 d = json.load(sys.stdin)
+if isinstance(d, list):
+    d = next((x for x in d if isinstance(x, dict) and x.get("type") == "result"), {})
 print(d.get("result", ""))
 cost = d.get("total_cost_usd")
 sid = d.get("session_id", "")

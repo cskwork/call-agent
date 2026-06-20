@@ -1,31 +1,20 @@
----
-name: notebooklm-call
-description: Delegate document RAG to Google NotebookLM via the unofficial notebooklm-py CLI. Use ONLY when the user explicitly says "notebooklm", "nblm", or "use NotebookLM", OR when the task is querying / generating audio overviews / running research over a defined document corpus (PDFs, URLs, YouTube, etc.) — capabilities Claude Code and Codex do not have natively. Do NOT use for general code or text Q&A.
-allowed-tools:
-  - Bash
-  - Read
-  - Write
-  - Grep
-  - Glob
----
+# call-agent -> notebooklm (Google NotebookLM)
 
-# notebooklm-call
-
-Wrap the `notebooklm` CLI (https://github.com/teng-lin/notebooklm-py) for
-document RAG, audio/video overviews, mind maps, and research over a
-user-defined corpus.
+Loaded by the `call-agent` router when delegating to `notebooklm`. Wrap the
+`notebooklm` CLI (https://github.com/teng-lin/notebooklm-py) for document
+RAG, audio/video overviews, mind maps, and research over a user-defined
+corpus.
 
 > ⚠️ **Unofficial library.** notebooklm-py uses undocumented Google APIs
 > and your own browser session cookies. Endpoints can change without
 > notice and heavy usage MAY get a Google account flagged. Do not use
 > for production-critical pipelines.
 
-## When this skill fires
+## When to route here
 
 1. **Explicit name** — user says "notebooklm" or "nblm".
 2. **Feature gap** — user asks for RAG / audio-overview / video-overview
-   / mind-map over a document collection. Neither Claude Code nor Codex
-   does this natively.
+   / mind-map over a document collection. No host CLI does this natively.
 
 Do NOT fire for: general Q&A, code analysis, or web research that does
 not involve a curated document corpus.

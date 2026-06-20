@@ -48,7 +48,10 @@ if [ "${RUN_L2:-0}" = "1" ] && [ "$HAVE_AUTH" = "1" ]; then
           --output-format json \
           --no-session-persistence \
           "Reply with exactly: OK" 2>/dev/null \
-        | python3 -c 'import sys,json; print(json.load(sys.stdin).get("result",""))' \
+        | python3 -c 'import sys,json
+d=json.load(sys.stdin)
+if isinstance(d,list): d=next((x for x in d if isinstance(x,dict) and x.get("type")=="result"),{})
+print(d.get("result",""))' \
         | tr -d '[:space:]')
   if echo "$OUT" | grep -qi 'ok'; then
     note "L2 ok: round-trip"

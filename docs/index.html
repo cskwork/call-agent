@@ -6,7 +6,7 @@
   <title>cc-agent-call — Cross-CLI delegation skills</title>
   <meta name="description" content="Let one agentic CLI (Claude Code or Codex) shell out to another (agy, kiro, codex, NotebookLM, Claude Code) when the target tool has a feature the host lacks." />
   <meta property="og:title" content="cc-agent-call" />
-  <meta property="og:description" content="Cross-CLI delegation skills: Claude Code / Codex / agy / kiro-cli / NotebookLM. 5 skills, each fully tested." />
+  <meta property="og:description" content="Cross-CLI delegation: Claude Code / Codex / agy / kiro-cli / NotebookLM. One router skill, five targets, each fully tested." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://cskwork.github.io/cc-agent-call/" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E" />
@@ -173,7 +173,7 @@
       <div class="i18n-en">
         <h1>One agentic CLI, <span class="grad">five tools at its back.</span></h1>
         <p class="lede">
-          A bundle of "delegation skills" that let the AI CLI you have open (Claude Code or Codex)
+          A single "delegation skill" that lets the AI CLI you have open (Claude Code or Codex)
           shell out to <b>agy</b>, <b>kiro-cli</b>, <b>codex</b>, <b>NotebookLM</b>, or <b>Claude Code</b>
           when the other tool is genuinely better at the task — without you leaving the terminal.
         </p>
@@ -183,7 +183,7 @@
         <p class="lede">
           지금 켜놓은 AI CLI(Claude Code 또는 Codex)가 못 하는 일을 다른 CLI
           (<b>agy</b>, <b>kiro-cli</b>, <b>codex</b>, <b>NotebookLM</b>, <b>Claude Code</b>) 에게
-          <b>자동으로 떠넘기게</b> 해 주는 "위임 스킬" 모음입니다. 터미널을 갈아탈 필요가 없습니다.
+          <b>자동으로 떠넘기게</b> 해 주는 단일 "위임 스킬" 입니다. 터미널을 갈아탈 필요가 없습니다.
         </p>
       </div>
 
@@ -193,7 +193,7 @@
         <a class="btn" href="#skills"><span class="i18n-en">See skills</span><span class="i18n-ko">스킬 보기</span></a>
       </div>
       <div class="pills">
-        <span class="pill">5 skills</span>
+        <span class="pill">1 skill · 5 targets</span>
         <span class="pill">Claude Code + Codex hosts</span>
         <span class="pill">MIT licensed</span>
         <span class="pill">L0 / L1 / L2 / L3 tests</span>
@@ -201,15 +201,12 @@
 
       <div class="terminal" aria-hidden="true">
         <div class="tbar"><span class="b r"></span><span class="b y"></span><span class="b g"></span><span class="title">~/cc-agent-call</span></div>
-<pre><span class="c"># clone + install all skills</span>
+<pre><span class="c"># clone + install the one skill</span>
 <span class="p">$</span> <span class="k">git</span> clone https://github.com/cskwork/cc-agent-call
 <span class="p">$</span> <span class="k">cd</span> cc-agent-call
 <span class="p">$</span> ./install.sh
-<span class="c">→ linked agy-call       → ~/.claude/skills/agy-call</span>
-<span class="c">→ linked kiro-call      → ~/.claude/skills/kiro-call</span>
-<span class="c">→ linked codex-call     → ~/.claude/skills/codex-call</span>
-<span class="c">→ linked notebooklm-call → ~/.claude/skills + ~/.codex/skills</span>
-<span class="c">→ linked claude-call    → ~/.codex/skills/claude-call</span>
+<span class="c">→ linked call-agent → ~/.claude/skills/call-agent</span>
+<span class="c">→ linked call-agent → ~/.codex/skills/call-agent</span>
 <span class="p">$</span> <span class="k">claude</span> <span class="s">"use agy to generate a logo for this README"</span>
 </pre>
       </div>
@@ -248,8 +245,8 @@
         </div>
         <div class="term">
           <h4>MCP</h4>
-          <p class="i18n-en">Model Context Protocol — a shared protocol that lets different AI tools talk to the same external servers (files, DBs, web). Used by <code>kiro-call</code>'s cross-registry feature.</p>
-          <p class="i18n-ko">Model Context Protocol. 여러 AI 도구가 공통으로 외부 서버(파일·DB·웹)에 접근하기 위한 규약. <code>kiro-call</code>의 cross-registry에서 등장.</p>
+          <p class="i18n-en">Model Context Protocol — a shared protocol that lets different AI tools talk to the same external servers (files, DBs, web). Used by the <code>kiro</code> target's cross-registry feature.</p>
+          <p class="i18n-ko">Model Context Protocol. 여러 AI 도구가 공통으로 외부 서버(파일·DB·웹)에 접근하기 위한 규약. <code>kiro</code> 타깃의 cross-registry에서 등장.</p>
         </div>
         <div class="term">
           <h4>RAG</h4>
@@ -279,7 +276,7 @@
             <li><b>NotebookLM</b> — Drop in PDFs / URLs / YouTube and get faithful RAG answers; can produce audio overviews.</li>
           </ul>
           <blockquote>"I'm in the middle of working in Claude Code and I just need one diagram image. Now I have to open another terminal, launch Codex, copy context over… annoying."</blockquote>
-          <p><b>cc-agent-call</b> removes that friction. Inside Claude Code you say "generate an image of …" and Claude Code automatically invokes <code>codex-call</code>, which shells out to Codex, generates the image, and reports the path back. You never leave the host CLI.</p>
+          <p><b>cc-agent-call</b> removes that friction. Inside Claude Code you say "generate an image of …" and the <code>call-agent</code> skill routes to the <code>codex</code> target, which shells out to Codex, generates the image, and reports the path back. You never leave the host CLI.</p>
         </div>
         <div class="i18n-ko">
           <ul>
@@ -290,7 +287,7 @@
             <li><b>NotebookLM</b> — PDF·웹·유튜브를 통째로 넣고 정확한 RAG 답변, 오디오 개요 생성.</li>
           </ul>
           <blockquote>"지금 Claude Code로 작업 중인데 다이어그램 이미지가 하나 필요해. 일일이 다른 터미널 열어서 Codex 켜고… 귀찮네."</blockquote>
-          <p><b>cc-agent-call</b>은 그 귀찮음을 없앱니다. Claude Code 안에서 "이미지 하나 만들어줘" 라고 하면, Claude Code가 알아서 <code>codex-call</code> 스킬을 통해 Codex를 실행해 이미지를 받아옵니다. 사용자는 CLI를 갈아탈 필요가 없습니다.</p>
+          <p><b>cc-agent-call</b>은 그 귀찮음을 없앱니다. Claude Code 안에서 "이미지 하나 만들어줘" 라고 하면, <code>call-agent</code> 스킬이 <code>codex</code> 타깃으로 라우팅해 Codex를 실행하고 이미지를 받아옵니다. 사용자는 CLI를 갈아탈 필요가 없습니다.</p>
         </div>
       </div>
     </div>
@@ -299,17 +296,17 @@
   <!-- ========================= SKILLS ========================= -->
   <section id="skills">
     <div class="wrap">
-      <h2><span class="i18n-en">The 5 skills</span><span class="i18n-ko">들어있는 스킬 5개</span></h2>
+      <h2><span class="i18n-en">One skill, five targets</span><span class="i18n-ko">스킬 하나, 다섯 타깃</span></h2>
       <p class="sub">
-        <span class="i18n-en">Each skill is a <code>SKILL.md</code> that the host CLI auto-discovers. Symlinked, not vendored.</span>
-        <span class="i18n-ko">각 스킬은 <code>SKILL.md</code> 한 장 — 호스트가 자동 발견. 복사 아닌 symlink.</span>
+        <span class="i18n-en"><code>call-agent</code> is one router <code>SKILL.md</code>; each target lives in <code>reference/&lt;name&gt;/</code> and loads only when routed to.</span>
+        <span class="i18n-ko"><code>call-agent</code>은 라우터 <code>SKILL.md</code> 한 장 — 각 타깃은 <code>reference/&lt;name&gt;/</code>에 있고 라우팅될 때만 로드.</span>
       </p>
       <div class="grid">
 
         <div class="card">
           <div class="row">
-            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/agy-call">agy-call</a></h3>
-            <span class="badge cc">Claude Code</span>
+            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/call-agent/reference/agy">agy</a></h3>
+            <span class="badge cc">needs agy</span>
           </div>
           <p class="i18n-en">Google Antigravity — Google Search grounding, image generation, second-opinion review, scientific databases (gnomAD, UniProt, PubMed).</p>
           <p class="i18n-ko">Google Antigravity — 최신 웹 정보 grounding, 이미지 생성, gnomAD/UniProt/PubMed 같은 생명과학 DB 조회, 2차 의견.</p>
@@ -317,8 +314,8 @@
 
         <div class="card">
           <div class="row">
-            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/kiro-call">kiro-call</a></h3>
-            <span class="badge cc">Claude Code</span>
+            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/call-agent/reference/kiro">kiro</a></h3>
+            <span class="badge cc">needs kiro-cli</span>
           </div>
           <p class="i18n-en">AWS Kiro CLI — headless agentic terminal, natural-language → shell translation, MCP cross-registry, AWS Bedrock peer opinion.</p>
           <p class="i18n-ko">AWS Kiro CLI — "이거 하는 셸 명령 알려줘" 식 자연어 → 셸 번역, MCP 서버 교차 등록, AWS Bedrock 모델로 2차 의견.</p>
@@ -326,8 +323,8 @@
 
         <div class="card">
           <div class="row">
-            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/codex-call">codex-call</a></h3>
-            <span class="badge cc">Claude Code</span>
+            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/call-agent/reference/codex">codex</a></h3>
+            <span class="badge cc">needs codex</span>
           </div>
           <p class="i18n-en">OpenAI Codex — highest-quality image generation via <code>gpt-image-2</code>, plus one-shot <code>codex review</code> for an outside take on a diff.</p>
           <p class="i18n-ko">OpenAI Codex — <code>gpt-image-2</code>로 고품질 이미지 생성, <code>codex review</code>로 외부 시각의 코드 리뷰.</p>
@@ -335,8 +332,8 @@
 
         <div class="card">
           <div class="row">
-            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/notebooklm-call">notebooklm-call</a></h3>
-            <span class="badge both">Claude Code + Codex</span>
+            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/call-agent/reference/notebooklm">notebooklm</a></h3>
+            <span class="badge both">needs notebooklm</span>
           </div>
           <p class="i18n-en">NotebookLM — document RAG over PDFs/URLs/YouTube, audio overview generation, and bulk web research import.</p>
           <p class="i18n-ko">NotebookLM — PDF/URL/YouTube 문서 묶음에 대한 RAG QA, 오디오 개요, 대량 웹 자료 import.</p>
@@ -344,8 +341,8 @@
 
         <div class="card">
           <div class="row">
-            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/claude-call">claude-call</a></h3>
-            <span class="badge cx">Codex CLI</span>
+            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/call-agent/reference/claude">claude</a></h3>
+            <span class="badge cx">needs claude</span>
           </div>
           <p class="i18n-en">Claude Code — 1M-context plan-mode planning and deep code review delegated from inside Codex.</p>
           <p class="i18n-ko">Claude Code — Codex 사용자가 1M 컨텍스트 기획(plan-mode)이나 대형 코드베이스 심층 리뷰가 필요할 때 사용.</p>
@@ -360,8 +357,8 @@
     <div class="wrap">
       <h2><span class="i18n-en">When does a skill auto-fire?</span><span class="i18n-ko">언제 자동으로 호출되나요?</span></h2>
       <p class="sub">
-        <span class="i18n-en">Each <code>SKILL.md</code> is configured so the host invokes it only under one of two conditions. No routine hijacking.</span>
-        <span class="i18n-ko">각 <code>SKILL.md</code>는 두 가지 조건 중 하나일 때만 발동. 평상시 작업은 가로채지 않음.</span>
+        <span class="i18n-en">The <code>call-agent</code> router fires only under one of two conditions. No routine hijacking.</span>
+        <span class="i18n-ko"><code>call-agent</code> 라우터는 두 가지 조건 중 하나일 때만 발동. 평상시 작업은 가로채지 않음.</span>
       </p>
       <div class="policy">
         <div class="card">
@@ -393,20 +390,19 @@
     <div class="wrap">
       <h2><span class="i18n-en">Install</span><span class="i18n-ko">설치</span></h2>
       <p class="sub">
-        <span class="i18n-en"><code>install.sh</code> creates <b>symlinks</b> from this repo's <code>skills/&lt;name&gt;</code> into the host CLI's skill directory. Because they're symlinks, a <code>git pull</code> here is immediately visible to the host.</span>
-        <span class="i18n-ko"><code>install.sh</code>는 이 저장소의 <code>skills/&lt;name&gt;</code> 폴더를 호스트 CLI가 보는 위치로 <b>symlink</b> 해줍니다. 복사가 아니라 링크라 저장소를 <code>git pull</code> 하면 호스트도 즉시 새 버전을 봅니다.</span>
+        <span class="i18n-en"><code>install.sh</code> <b>symlinks</b> <code>skills/call-agent</code> into <b>both</b> host skill dirs (<code>~/.claude/skills</code> and <code>~/.codex/skills</code>). Because it's a symlink, a <code>git pull</code> here is immediately visible to the host.</span>
+        <span class="i18n-ko"><code>install.sh</code>는 <code>skills/call-agent</code>를 <b>양쪽</b> 호스트 스킬 폴더(<code>~/.claude/skills</code>, <code>~/.codex/skills</code>)에 <b>symlink</b> 합니다. 복사가 아니라 링크라 <code>git pull</code> 하면 호스트도 즉시 새 버전을 봅니다.</span>
       </p>
       <div class="terminal">
         <div class="tbar"><span class="b r"></span><span class="b y"></span><span class="b g"></span><span class="title">install</span></div>
-<pre><span class="p">$</span> ./install.sh                 <span class="c"># link all skills</span>
-<span class="p">$</span> ./install.sh agy-call        <span class="c"># link one skill</span>
+<pre><span class="p">$</span> ./install.sh                 <span class="c"># link call-agent into both hosts</span>
 <span class="p">$</span> ./install.sh --dry-run       <span class="c"># preview what would be linked</span>
-<span class="p">$</span> ./install.sh --uninstall     <span class="c"># remove every symlink this script created</span>
+<span class="p">$</span> ./install.sh --uninstall     <span class="c"># remove call-agent (+ legacy *-call) links</span>
 
-<span class="c"># Targets:</span>
-<span class="c">#   Claude-Code skills → ~/.claude/skills/&lt;name&gt;</span>
-<span class="c">#   Codex skills       → ~/.codex/skills/&lt;name&gt;</span>
-<span class="c">#   notebooklm-call    → linked into both</span>
+<span class="c"># One skill, linked into both host dirs:</span>
+<span class="c">#   ~/.claude/skills/call-agent</span>
+<span class="c">#   ~/.codex/skills/call-agent</span>
+<span class="c"># Rule zero: it never delegates to the host it runs in.</span>
 </pre>
       </div>
 
@@ -421,7 +417,7 @@
 <pre><span class="p">&gt;</span> <span class="s">"Generate an abstract illustration for the top of my README. 1:1 ratio."</span>
 
 <span class="c"># Claude Code cannot generate images natively.</span>
-<span class="c"># The installed codex-call skill fires automatically:</span>
+<span class="c"># call-agent routes to the codex target automatically:</span>
 <span class="c">#   1. Reshapes your prompt for Codex and shells out to `codex`</span>
 <span class="c">#   2. Codex generates the image via gpt-image-2</span>
 <span class="c">#   3. Resulting file path is reported back in the Claude Code thread</span>
@@ -435,43 +431,43 @@
   <!-- ========================= PREREQ ========================= -->
   <section id="prereq">
     <div class="wrap">
-      <h2><span class="i18n-en">Per-skill prerequisites</span><span class="i18n-ko">스킬별 사전 준비</span></h2>
+      <h2><span class="i18n-en">Per-target prerequisites</span><span class="i18n-ko">타깃별 사전 준비</span></h2>
       <p class="sub">
-        <span class="i18n-en">Each skill is a thin wrapper — the underlying CLI must be installed and authenticated. Only set up the skills you actually plan to use.</span>
-        <span class="i18n-ko">각 스킬은 얇은 wrapper일 뿐 — 실제 CLI 바이너리가 설치되고 인증돼 있어야 함. 본인이 쓸 것만 준비하면 됩니다.</span>
+        <span class="i18n-en">Each target is a thin wrapper — the underlying CLI must be installed and authenticated. Only set up the targets you actually plan to use.</span>
+        <span class="i18n-ko">각 타깃은 얇은 wrapper일 뿐 — 실제 CLI 바이너리가 설치되고 인증돼 있어야 함. 본인이 쓸 것만 준비하면 됩니다.</span>
       </p>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th><span class="i18n-en">Skill</span><span class="i18n-ko">스킬</span></th>
+              <th><span class="i18n-en">Target</span><span class="i18n-ko">타깃</span></th>
               <th><span class="i18n-en">Required binary</span><span class="i18n-ko">필요한 바이너리</span></th>
               <th><span class="i18n-en">Auth</span><span class="i18n-ko">인증</span></th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><code>agy-call</code></td>
+              <td><code>agy</code></td>
               <td><code>agy</code></td>
               <td><span class="i18n-en"><code>agy install</code> then Google sign-in</span><span class="i18n-ko"><code>agy install</code> 후 Google 로그인</span></td>
             </tr>
             <tr>
-              <td><code>kiro-call</code></td>
+              <td><code>kiro</code></td>
               <td><code>kiro-cli</code></td>
               <td><code>kiro-cli login</code></td>
             </tr>
             <tr>
-              <td><code>codex-call</code></td>
+              <td><code>codex</code></td>
               <td><code>codex</code></td>
               <td><span class="i18n-en"><code>codex login</code> (ChatGPT) or <code>OPENAI_API_KEY</code></span><span class="i18n-ko"><code>codex login</code> (ChatGPT) 또는 <code>OPENAI_API_KEY</code> 환경변수</span></td>
             </tr>
             <tr>
-              <td><code>notebooklm-call</code></td>
+              <td><code>notebooklm</code></td>
               <td>Python 3.10+, <code>notebooklm</code></td>
               <td><span class="i18n-en"><code>notebooklm login</code> (browser, one-time)</span><span class="i18n-ko"><code>notebooklm login</code> (브라우저 1회)</span></td>
             </tr>
             <tr>
-              <td><code>claude-call</code></td>
+              <td><code>claude</code></td>
               <td><code>claude</code></td>
               <td><span class="i18n-en"><code>claude auth login</code> or <code>ANTHROPIC_API_KEY</code></span><span class="i18n-ko"><code>claude auth login</code> 또는 <code>ANTHROPIC_API_KEY</code> 환경변수</span></td>
             </tr>
@@ -495,8 +491,8 @@
 <span class="p">$</span> RUN_L2=1 ./tests/run-all.sh        <span class="c"># adds L2: real round-trip prompts (uses credit)</span>
 <span class="p">$</span> RUN_L3=1 ./tests/run-all.sh        <span class="c"># adds L3: feature exercises (image gen etc.)</span>
 
-<span class="c"># Each skill also has its own smoke test:</span>
-<span class="p">$</span> ./skills/agy-call/tests/smoke.sh
+<span class="c"># Each target also has its own smoke test:</span>
+<span class="p">$</span> ./skills/call-agent/reference/agy/tests/smoke.sh
 </pre>
       </div>
     </div>
@@ -523,8 +519,8 @@
         </details>
         <details>
           <summary><span class="i18n-en">Can I add a brand-new CLI?</span><span class="i18n-ko">새 CLI(예: 차세대 도구)도 추가할 수 있나요?</span></summary>
-          <p class="i18n-en">Yes. Create <code>skills/&lt;new-name&gt;/SKILL.md</code> and add a case in <code>install.sh</code>'s <code>declare_targets()</code> mapping it to the right host directory.</p>
-          <p class="i18n-ko">가능합니다. <code>skills/&lt;new-name&gt;/SKILL.md</code>를 만들고 <code>install.sh</code>의 <code>declare_targets()</code> 케이스에 호스트 위치를 추가하면 됩니다.</p>
+          <p class="i18n-en">Yes — two steps, no installer change: create <code>skills/call-agent/reference/&lt;new-name&gt;/call.md</code>, then add one row to the Route table in <code>skills/call-agent/SKILL.md</code>.</p>
+          <p class="i18n-ko">가능합니다 — 설치 스크립트 수정 없이 두 단계: <code>skills/call-agent/reference/&lt;new-name&gt;/call.md</code>를 만들고, <code>skills/call-agent/SKILL.md</code>의 Route 표에 한 줄 추가.</p>
         </details>
         <details>
           <summary><span class="i18n-en">What about security?</span><span class="i18n-ko">보안은 어떤가요?</span></summary>

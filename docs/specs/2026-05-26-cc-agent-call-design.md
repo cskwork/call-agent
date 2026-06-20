@@ -1,7 +1,9 @@
 # cc-agent-call — Design Spec
 
 Date: 2026-05-26
-Status: Approved (auto-mode)
+Status: Approved (auto-mode). Superseded 2026-06-20 — the five skills were
+consolidated into one `call-agent` router (see `log/changelog-2026-06-20.md`).
+Kept as the v1 design record.
 
 ## Purpose
 

@@ -11,11 +11,12 @@
 set -u
 
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-SKILLS=(agy-call kiro-call codex-call notebooklm-call claude-call)
+# call-agent bundles every peer CLI as reference/<agent>/; each keeps its own smoke test.
+AGENTS=(agy kiro codex notebooklm claude)
 
 passed=""; skipped=""; failed=""
-for s in "${SKILLS[@]}"; do
-  smoke="$REPO_DIR/skills/$s/tests/smoke.sh"
+for s in "${AGENTS[@]}"; do
+  smoke="$REPO_DIR/skills/call-agent/reference/$s/tests/smoke.sh"
   if [ ! -f "$smoke" ]; then
     echo "[$s] no smoke.sh"; failed="$failed $s"; continue
   fi
