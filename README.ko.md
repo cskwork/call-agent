@@ -1,4 +1,4 @@
-# cc-agent-call
+# call-agent
 
 **한국어** · [English](./README.md)
 
@@ -36,7 +36,7 @@
 
 > "지금 Claude Code로 작업 중인데 다이어그램 이미지가 하나 필요해. 일일이 다른 터미널 열어서 Codex 켜고… 귀찮네."
 
-**cc-agent-call**은 그 귀찮음을 없앱니다. Claude Code 안에서 "이미지 하나 만들어줘" 라고 하면, `call-agent` 스킬이 발동해 요청을 Codex로 라우팅하고, 이미지를 받아와 경로를 보고합니다. 사용자는 CLI를 갈아탈 필요가 없습니다.
+**call-agent**은 그 귀찮음을 없앱니다. Claude Code 안에서 "이미지 하나 만들어줘" 라고 하면, `call-agent` 스킬이 발동해 요청을 Codex로 라우팅하고, 이미지를 받아와 경로를 보고합니다. 사용자는 CLI를 갈아탈 필요가 없습니다.
 
 ---
 
@@ -98,11 +98,11 @@
 
 ```bash
 # GitHub에서
-git clone https://github.com/cskwork/cc-agent-call
+git clone https://github.com/cskwork/call-agent
 # 또는 사내 Gitea에서
 git clone https://gitea.agentic-worker.store/Donga-AX/cc-agent-call.git
 
-cd cc-agent-call
+cd call-agent
 ```
 
 ### 4-3. 스킬 심볼릭 링크 생성

@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>cc-agent-call — Cross-CLI delegation skills</title>
+  <title>call-agent — Cross-CLI delegation skills</title>
   <meta name="description" content="Let one agentic CLI (Claude Code or Codex) shell out to another (agy, kiro, codex, NotebookLM, Claude Code) when the target tool has a feature the host lacks." />
-  <meta property="og:title" content="cc-agent-call" />
+  <meta property="og:title" content="call-agent" />
   <meta property="og:description" content="Cross-CLI delegation: Claude Code / Codex / agy / kiro-cli / NotebookLM. One router skill, five targets, each fully tested." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://cskwork.github.io/cc-agent-call/" />
+  <meta property="og:url" content="https://cskwork.github.io/call-agent/" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E" />
   <style>
     :root{
@@ -147,7 +147,7 @@
 <body class="lang-en">
   <header class="nav">
     <div class="wrap nav-inner">
-      <div class="brand"><span class="dot"></span><span class="mono">cc-agent-call</span></div>
+      <div class="brand"><span class="dot"></span><span class="mono">call-agent</span></div>
       <div class="nav-right">
         <nav>
           <a class="nav-link" href="#glossary"><span class="i18n-en">Glossary</span><span class="i18n-ko">용어</span></a>
@@ -155,7 +155,7 @@
           <a class="nav-link" href="#skills"><span class="i18n-en">Skills</span><span class="i18n-ko">스킬</span></a>
           <a class="nav-link" href="#install"><span class="i18n-en">Install</span><span class="i18n-ko">설치</span></a>
           <a class="nav-link" href="#faq">FAQ</a>
-          <a class="nav-link" href="https://github.com/cskwork/cc-agent-call">GitHub</a>
+          <a class="nav-link" href="https://github.com/cskwork/call-agent">GitHub</a>
         </nav>
         <div class="lang-toggle" role="group" aria-label="Language">
           <button data-lang="en" class="active" aria-label="English">EN</button>
@@ -189,7 +189,7 @@
 
       <div class="cta">
         <a class="btn primary" href="#install"><span class="i18n-en">Install</span><span class="i18n-ko">설치하기</span></a>
-        <a class="btn" href="https://github.com/cskwork/cc-agent-call"><span class="i18n-en">View on GitHub</span><span class="i18n-ko">GitHub에서 보기</span></a>
+        <a class="btn" href="https://github.com/cskwork/call-agent"><span class="i18n-en">View on GitHub</span><span class="i18n-ko">GitHub에서 보기</span></a>
         <a class="btn" href="#skills"><span class="i18n-en">See skills</span><span class="i18n-ko">스킬 보기</span></a>
       </div>
       <div class="pills">
@@ -200,10 +200,10 @@
       </div>
 
       <div class="terminal" aria-hidden="true">
-        <div class="tbar"><span class="b r"></span><span class="b y"></span><span class="b g"></span><span class="title">~/cc-agent-call</span></div>
+        <div class="tbar"><span class="b r"></span><span class="b y"></span><span class="b g"></span><span class="title">~/call-agent</span></div>
 <pre><span class="c"># clone + install the one skill</span>
-<span class="p">$</span> <span class="k">git</span> clone https://github.com/cskwork/cc-agent-call
-<span class="p">$</span> <span class="k">cd</span> cc-agent-call
+<span class="p">$</span> <span class="k">git</span> clone https://github.com/cskwork/call-agent
+<span class="p">$</span> <span class="k">cd</span> call-agent
 <span class="p">$</span> ./install.sh
 <span class="c">→ linked call-agent → ~/.claude/skills/call-agent</span>
 <span class="c">→ linked call-agent → ~/.codex/skills/call-agent</span>
@@ -240,7 +240,7 @@
         </div>
         <div class="term">
           <h4>Delegation</h4>
-          <p class="i18n-en">Instead of doing the work itself, the host shells out to <b>another CLI</b> and returns the result. This is what cc-agent-call enables.</p>
+          <p class="i18n-en">Instead of doing the work itself, the host shells out to <b>another CLI</b> and returns the result. This is what call-agent enables.</p>
           <p class="i18n-ko">호스트가 직접 처리하지 않고 <b>다른 CLI를 셸에서 실행</b>시켜 결과를 받아오는 행동. 이 저장소의 핵심 동작.</p>
         </div>
         <div class="term">
@@ -276,7 +276,7 @@
             <li><b>NotebookLM</b> — Drop in PDFs / URLs / YouTube and get faithful RAG answers; can produce audio overviews.</li>
           </ul>
           <blockquote>"I'm in the middle of working in Claude Code and I just need one diagram image. Now I have to open another terminal, launch Codex, copy context over… annoying."</blockquote>
-          <p><b>cc-agent-call</b> removes that friction. Inside Claude Code you say "generate an image of …" and the <code>call-agent</code> skill routes to the <code>codex</code> target, which shells out to Codex, generates the image, and reports the path back. You never leave the host CLI.</p>
+          <p><b>call-agent</b> removes that friction. Inside Claude Code you say "generate an image of …" and the <code>call-agent</code> skill routes to the <code>codex</code> target, which shells out to Codex, generates the image, and reports the path back. You never leave the host CLI.</p>
         </div>
         <div class="i18n-ko">
           <ul>
@@ -287,7 +287,7 @@
             <li><b>NotebookLM</b> — PDF·웹·유튜브를 통째로 넣고 정확한 RAG 답변, 오디오 개요 생성.</li>
           </ul>
           <blockquote>"지금 Claude Code로 작업 중인데 다이어그램 이미지가 하나 필요해. 일일이 다른 터미널 열어서 Codex 켜고… 귀찮네."</blockquote>
-          <p><b>cc-agent-call</b>은 그 귀찮음을 없앱니다. Claude Code 안에서 "이미지 하나 만들어줘" 라고 하면, <code>call-agent</code> 스킬이 <code>codex</code> 타깃으로 라우팅해 Codex를 실행하고 이미지를 받아옵니다. 사용자는 CLI를 갈아탈 필요가 없습니다.</p>
+          <p><b>call-agent</b>은 그 귀찮음을 없앱니다. Claude Code 안에서 "이미지 하나 만들어줘" 라고 하면, <code>call-agent</code> 스킬이 <code>codex</code> 타깃으로 라우팅해 Codex를 실행하고 이미지를 받아옵니다. 사용자는 CLI를 갈아탈 필요가 없습니다.</p>
         </div>
       </div>
     </div>
@@ -305,7 +305,7 @@
 
         <div class="card">
           <div class="row">
-            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/call-agent/reference/agy">agy</a></h3>
+            <h3><a href="https://github.com/cskwork/call-agent/tree/master/skills/call-agent/reference/agy">agy</a></h3>
             <span class="badge cc">needs agy</span>
           </div>
           <p class="i18n-en">Google Antigravity — Google Search grounding, image generation, second-opinion review, scientific databases (gnomAD, UniProt, PubMed).</p>
@@ -314,7 +314,7 @@
 
         <div class="card">
           <div class="row">
-            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/call-agent/reference/kiro">kiro</a></h3>
+            <h3><a href="https://github.com/cskwork/call-agent/tree/master/skills/call-agent/reference/kiro">kiro</a></h3>
             <span class="badge cc">needs kiro-cli</span>
           </div>
           <p class="i18n-en">AWS Kiro CLI — headless agentic terminal, natural-language → shell translation, MCP cross-registry, AWS Bedrock peer opinion.</p>
@@ -323,7 +323,7 @@
 
         <div class="card">
           <div class="row">
-            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/call-agent/reference/codex">codex</a></h3>
+            <h3><a href="https://github.com/cskwork/call-agent/tree/master/skills/call-agent/reference/codex">codex</a></h3>
             <span class="badge cc">needs codex</span>
           </div>
           <p class="i18n-en">OpenAI Codex — highest-quality image generation via <code>gpt-image-2</code>, plus one-shot <code>codex review</code> for an outside take on a diff.</p>
@@ -332,7 +332,7 @@
 
         <div class="card">
           <div class="row">
-            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/call-agent/reference/notebooklm">notebooklm</a></h3>
+            <h3><a href="https://github.com/cskwork/call-agent/tree/master/skills/call-agent/reference/notebooklm">notebooklm</a></h3>
             <span class="badge both">needs notebooklm</span>
           </div>
           <p class="i18n-en">NotebookLM — document RAG over PDFs/URLs/YouTube, audio overview generation, and bulk web research import.</p>
@@ -341,7 +341,7 @@
 
         <div class="card">
           <div class="row">
-            <h3><a href="https://github.com/cskwork/cc-agent-call/tree/master/skills/call-agent/reference/claude">claude</a></h3>
+            <h3><a href="https://github.com/cskwork/call-agent/tree/master/skills/call-agent/reference/claude">claude</a></h3>
             <span class="badge cx">needs claude</span>
           </div>
           <p class="i18n-en">Claude Code — 1M-context plan-mode planning and deep code review delegated from inside Codex.</p>
@@ -537,13 +537,13 @@
         <span class="i18n-en">MIT License · Built by <a href="https://github.com/cskwork">@cskwork</a></span>
         <span class="i18n-ko">MIT License · 제작 <a href="https://github.com/cskwork">@cskwork</a></span>
       </div>
-      <div><a href="https://github.com/cskwork/cc-agent-call">github.com/cskwork/cc-agent-call</a></div>
+      <div><a href="https://github.com/cskwork/call-agent">github.com/cskwork/call-agent</a></div>
     </div>
   </footer>
 
   <script>
     (function(){
-      var KEY = 'cc-agent-call-lang';
+      var KEY = 'call-agent-lang';
       var buttons = document.querySelectorAll('.lang-toggle button[data-lang]');
       function setLang(lang){
         if (lang !== 'en' && lang !== 'ko') lang = 'en';
