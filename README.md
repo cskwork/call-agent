@@ -1,4 +1,4 @@
-# cc-agent-call
+# call-agent
 
 [한국어](./README.ko.md) · **English**
 
@@ -16,7 +16,7 @@ A few terms used throughout this README:
 | **Host** | The CLI you have open and are talking to right now. Usually Claude Code or Codex. |
 | **Skill** | A folder containing a `SKILL.md` plus optional scripts. Claude Code / Codex auto-discover skills and load the relevant one based on what you ask. |
 | **Router** | A skill whose `SKILL.md` does not do the work itself — it classifies your request and loads exactly one detailed reference file. `call-agent` is a router. |
-| **Delegation** | Instead of doing the work itself, the host shells out to **another CLI** and returns the result. This is what cc-agent-call enables. |
+| **Delegation** | Instead of doing the work itself, the host shells out to **another CLI** and returns the result. This is what call-agent enables. |
 | **MCP** | Model Context Protocol — a shared protocol that lets different AI tools talk to the same external servers (files, DBs, web). Comes up in the `kiro` target's cross-registry feature. |
 | **RAG** | Retrieval-Augmented Generation — the model retrieves source documents first and uses them as grounded evidence. NotebookLM is built around this. |
 
@@ -36,7 +36,7 @@ The common annoyance:
 
 > "I'm in the middle of working in Claude Code and I just need one diagram image. Now I have to open another terminal, launch Codex, copy context over… annoying."
 
-**cc-agent-call** removes that friction. Inside Claude Code you say "generate an image of …" and the `call-agent` skill fires, routes the request to Codex, generates the image, and reports the path back. You never left Claude Code.
+**call-agent** removes that friction. Inside Claude Code you say "generate an image of …" and the `call-agent` skill fires, routes the request to Codex, generates the image, and reports the path back. You never left Claude Code.
 
 ---
 
@@ -98,11 +98,11 @@ You only need to set up the targets **you actually plan to use**. Not all of the
 
 ```bash
 # from GitHub
-git clone https://github.com/cskwork/cc-agent-call
+git clone https://github.com/cskwork/call-agent
 # or from self-hosted Gitea
 git clone https://gitea.agentic-worker.store/Donga-AX/cc-agent-call.git
 
-cd cc-agent-call
+cd call-agent
 ```
 
 ### 4-3. Run the installer

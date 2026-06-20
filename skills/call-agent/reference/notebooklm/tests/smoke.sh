@@ -44,7 +44,7 @@ fi
 
 # L3 — create + list + delete round-trip (no AI quota cost; verifies real API)
 if [ "${RUN_L3:-0}" = "1" ] && [ "$HAVE_NB" = "1" ]; then
-  NB_TITLE="cc-agent-call-smoke-$$"
+  NB_TITLE="call-agent-smoke-$$"
   CREATE_OUT=$(notebooklm create "$NB_TITLE" --json 2>/dev/null)
   # CLI versions differ: 0.3.x wraps in {"notebook": {"id": ...}}, newer may not
   NB_ID=$(echo "$CREATE_OUT" | python3 -c '
