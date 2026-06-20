@@ -1,14 +1,10 @@
----
-name: claude-call
-description: Delegate from Codex CLI to Claude Code. Use ONLY when the user explicitly says "claude" or "claude code", OR when the task is (a) planning that benefits from a 1M-token context window, (b) plan-mode (read-only) architecture work, or (c) a deep code review at `--effort high`. Do NOT use for routine edits, image generation, or anything Codex can do natively.
----
+# call-agent -> claude (Claude Code)
 
-# claude-call
+Loaded by the `call-agent` router when delegating to `claude`. Lets the
+host CLI shell out to Claude Code (`claude -p`) when Claude has a
+capability worth the extra hop (1M-token context, plan-mode, deep review).
 
-Codex-side skill. Lets Codex CLI shell out to Claude Code (`claude -p`)
-when Claude has a capability worth the extra hop.
-
-## When this skill fires
+## When to route here
 
 1. **Explicit name** — user says "claude" or "claude code".
 2. **Feature gap** — user asks for:
@@ -17,7 +13,7 @@ when Claude has a capability worth the extra hop.
    - A plan-mode (guaranteed read-only) architecture pass
    - A deep code review (`--effort high`) for a second opinion
 
-Do NOT fire for routine code edits — Codex handles those.
+Do NOT route here for routine code edits — the host CLI handles those.
 
 ## Preflight
 
@@ -72,21 +68,23 @@ claude -p --print \
 
 ## Output handling
 
-The JSON envelope:
+`claude -p --output-format json` returns a JSON **array** of stream events
+whose final element is the result envelope:
 
 ```json
 {
   "type": "result",
+  "subtype": "success",
   "result": "...the actual response markdown...",
   "session_id": "...",
-  "total_cost_usd": 0.0123,
-  "duration_ms": 14567,
-  "num_turns": 1
+  "total_cost_usd": 0.0123
 }
 ```
 
-Surface `.result` verbatim to the user. Log `.total_cost_usd` if cost
-tracking is requested.
+Pick the element with `type == "result"`, surface its `.result` verbatim,
+and log `.total_cost_usd` if cost tracking is requested. (Older claude
+returned this object directly, not wrapped in an array; the wrapper scripts
+handle both shapes.)
 
 ## Auth fallbacks
 

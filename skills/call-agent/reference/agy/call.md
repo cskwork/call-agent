@@ -1,20 +1,10 @@
----
-name: agy-call
-description: Delegate to Google Antigravity (agy) CLI. Use ONLY when the user explicitly says "agy", "antigravity", or "gemini cli", OR when the task is image generation, web research that needs Google Search grounding, a second AI opinion on a code/architecture decision, or a specialized scientific/biology database query (gnomAD, UniProt, PubMed, etc.). Do NOT use for routine code edits, planning, or analysis that Claude Code can do natively.
-allowed-tools:
-  - Bash
-  - Read
-  - Write
-  - Grep
-  - Glob
----
+# call-agent -> agy (Google Antigravity)
 
-# agy-call
+Loaded by the `call-agent` router when delegating to `agy`. Shell out to
+Google's Antigravity CLI (`agy`) for capabilities the host CLI cannot do
+natively.
 
-Shell out to Google's Antigravity CLI (`agy`) for capabilities Claude
-Code cannot do natively.
-
-## When this skill fires
+## When to route here
 
 Two conditions only:
 
@@ -25,8 +15,8 @@ Two conditions only:
    - A second AI perspective on code/architecture (different model lineage)
    - Specialized scientific database queries (gnomAD, UniProt, PubMed, ChEMBL, etc.)
 
-Do NOT fire for: generic code review, refactor, plan, file analysis,
-debugging. Claude Code handles those.
+Do NOT route here for: generic code review, refactor, plan, file
+analysis, debugging. The host CLI handles those.
 
 ## Preflight
 

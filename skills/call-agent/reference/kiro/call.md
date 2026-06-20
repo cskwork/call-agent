@@ -1,22 +1,12 @@
----
-name: kiro-call
-description: Delegate to AWS Kiro CLI (`kiro-cli`, the AWS Q successor — a headless agentic terminal). Use ONLY when the user explicitly says "kiro" or "kiro-cli", OR when the task is (a) natural-language → shell command translation (`kiro-cli translate`), (b) a second opinion from an AWS Bedrock / Q-family model, or (c) cross-registering an MCP server so Kiro can use it (`kiro-cli mcp`). Do NOT use for routine code work — Claude Code does that natively.
-allowed-tools:
-  - Bash
-  - Read
-  - Write
-  - Grep
-  - Glob
----
+# call-agent -> kiro (AWS Kiro CLI)
 
-# kiro-call
-
-Shell out to AWS Kiro CLI (`kiro-cli`) — a headless agentic terminal
-backed by AWS Bedrock / Kiro-managed models. Distinct from the Kiro IDE
-launcher (`/usr/local/bin/kiro`); this skill targets the CLI binary at
+Loaded by the `call-agent` router when delegating to `kiro`. Shell out to
+AWS Kiro CLI (`kiro-cli`) — a headless agentic terminal backed by AWS
+Bedrock / Kiro-managed models. Distinct from the Kiro IDE launcher
+(`/usr/local/bin/kiro`); this target uses the CLI binary at
 `~/.local/bin/kiro-cli` only.
 
-## When this skill fires
+## When to route here
 
 1. **Explicit name** — user says "kiro", "kiro-cli", or "ask kiro".
 2. **Feature gap** — user asks for:
@@ -27,8 +17,8 @@ launcher (`/usr/local/bin/kiro`); this skill targets the CLI binary at
    - Registering an MCP server in Kiro so Kiro can call it in future
      sessions (`kiro-cli mcp`)
 
-Do NOT fire for: routine code edits, planning, or analysis — Claude
-Code handles those.
+Do NOT route here for: routine code edits, planning, or analysis — the
+host CLI handles those.
 
 ## Preflight
 

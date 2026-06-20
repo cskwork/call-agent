@@ -2,7 +2,7 @@
 
 [한국어](./README.ko.md) · **English**
 
-> One-line summary: a bundle of "delegation skills" that let the AI CLI you're currently using (e.g. Claude Code) **automatically hand work off** to another AI CLI (Codex, Antigravity, Kiro, NotebookLM) when the other tool is better at it.
+> One-line summary: a single "delegation skill" (`call-agent`) that lets the AI CLI you're currently using (e.g. Claude Code) **automatically hand work off** to another AI CLI (Codex, Antigravity, Kiro, Claude Code, NotebookLM) when the other tool is better at it.
 
 ---
 
@@ -15,8 +15,9 @@ A few terms used throughout this README:
 | **Agentic CLI** | An AI tool that runs in your terminal. When you tell it "do X," it reads files, edits code, and runs commands on its own. Examples: Claude Code, OpenAI Codex CLI, Google Antigravity (`agy`), AWS Kiro CLI (`kiro-cli`). |
 | **Host** | The CLI you have open and are talking to right now. Usually Claude Code or Codex. |
 | **Skill** | A folder containing a `SKILL.md` plus optional scripts. Claude Code / Codex auto-discover skills and load the relevant one based on what you ask. |
+| **Router** | A skill whose `SKILL.md` does not do the work itself — it classifies your request and loads exactly one detailed reference file. `call-agent` is a router. |
 | **Delegation** | Instead of doing the work itself, the host shells out to **another CLI** and returns the result. This is what cc-agent-call enables. |
-| **MCP** | Model Context Protocol — a shared protocol that lets different AI tools talk to the same external servers (files, DBs, web). Comes up in `kiro-call`'s cross-registry feature. |
+| **MCP** | Model Context Protocol — a shared protocol that lets different AI tools talk to the same external servers (files, DBs, web). Comes up in the `kiro` target's cross-registry feature. |
 | **RAG** | Retrieval-Augmented Generation — the model retrieves source documents first and uses them as grounded evidence. NotebookLM is built around this. |
 
 ---
@@ -35,50 +36,63 @@ The common annoyance:
 
 > "I'm in the middle of working in Claude Code and I just need one diagram image. Now I have to open another terminal, launch Codex, copy context over… annoying."
 
-**cc-agent-call** removes that friction. Inside Claude Code you say "generate an image of …" and Claude Code automatically invokes the `codex-call` skill, which shells out to Codex, generates the image, and reports the path back. You never left Claude Code.
+**cc-agent-call** removes that friction. Inside Claude Code you say "generate an image of …" and the `call-agent` skill fires, routes the request to Codex, generates the image, and reports the path back. You never left Claude Code.
 
 ---
 
-## 2. When does a skill auto-fire?
+## 2. One skill, intent-based routing
 
-Each skill activates only under one of two conditions. This is intentionally narrow to avoid surprise billing and slow round-trips:
+Earlier versions of this repo shipped **five** separate skills (`agy-call`, `codex-call`, …). They are now consolidated into **one** skill, `call-agent`, that does **intent-based routing** — the same single-skill-with-a-router pattern used by skills like `supergoal`.
+
+`call-agent/SKILL.md` is a thin router:
+
+1. It classifies your request against a small table (which target tool, which capability).
+2. It loads exactly one detailed file — `reference/<target>/call.md` — and follows it.
+
+Why one skill instead of five:
+
+- **One description** competing for the model's attention at routing time, not five.
+- **One place** to add a new target: drop a `reference/<name>/call.md` and add a router row.
+- **Host-neutral.** The same skill installs into both Claude Code and Codex. Rule zero in the router: *never call yourself* — inside Claude Code it will not route to `claude`; inside Codex it will not route to `codex`.
+
+### When does `call-agent` auto-fire?
+
+It activates only under one of two conditions. This is intentionally narrow to avoid surprise billing and slow round-trips:
 
 1. **You name the target tool explicitly** — "use agy to search …", "ask codex to …", "have NotebookLM read these PDFs", etc.
-2. **You ask for something the host CLI cannot do natively** — e.g. inside Claude Code you ask for image generation → `codex-call` fires because Claude Code has no native image model.
+2. **You ask for something the host CLI cannot do natively** — e.g. inside Claude Code you ask for image generation → it routes to `codex` because Claude Code has no native image model.
 
 Routine work (`review this code`, `plan this feature`) does **not** trigger delegation. The host is presumed capable.
 
 ---
 
-## 3. The 5 skills
+## 3. The targets `call-agent` can route to
 
-| Skill | Runs inside | Borrows the powers of | Typical uses |
+| Target | Borrows the powers of | Typical uses | Explicit trigger words |
 |---|---|---|---|
-| [`agy-call`](skills/agy-call/) | Claude Code | Google Antigravity | Web-grounded search, image generation, scientific DBs (gnomAD/UniProt/PubMed), second opinion |
-| [`kiro-call`](skills/kiro-call/) | Claude Code | AWS Kiro CLI (`kiro-cli`) | Natural-language → shell translation, MCP cross-registry, second opinion via AWS Bedrock |
-| [`codex-call`](skills/codex-call/) | Claude Code | OpenAI Codex | High-quality image generation (`gpt-image-2`), explicit `codex review` |
-| [`notebooklm-call`](skills/notebooklm-call/) | Claude Code + Codex | Google NotebookLM | RAG over PDF/URL/YouTube corpora, audio overviews |
-| [`claude-call`](skills/claude-call/) | Codex CLI | Claude Code | When a Codex user needs 1M-context plan-mode planning or deep large-codebase review |
+| `codex` | OpenAI Codex | High-quality image generation (`gpt-image-2`), explicit `codex review` | "codex" |
+| `agy` | Google Antigravity | Web-grounded search, image generation, scientific DBs (gnomAD/UniProt/PubMed), second opinion | "agy", "antigravity", "gemini cli" |
+| `kiro` | AWS Kiro CLI (`kiro-cli`) | Natural-language → shell translation, MCP cross-registry, second opinion via AWS Bedrock | "kiro", "kiro-cli" |
+| `claude` | Claude Code | 1M-context plan-mode planning, deep large-codebase review (for a non-Claude host) | "claude", "claude code" |
+| `notebooklm` | Google NotebookLM | RAG over PDF/URL/YouTube corpora, audio overviews | "notebooklm", "nblm" |
 
-> "Runs inside" means **the CLI you have open right now**. For example, `claude-call` is installed for Codex users (so they can reach back into Claude Code).
-
-Open each skill folder's `SKILL.md` to see exact trigger keywords and invocation examples.
+Each target's exact invocation, flags, and wrapper scripts live in `skills/call-agent/reference/<target>/`. The router (`skills/call-agent/SKILL.md`) shows the full decision table.
 
 ---
 
 ## 4. Install
 
-### 4-1. Per-skill prerequisites
+### 4-1. Per-target prerequisites
 
-You only need to set up the skills **you actually plan to use**. Not all five.
+You only need to set up the targets **you actually plan to use**. Not all of them.
 
-| Skill | Required binary | Auth |
+| Target | Required binary | Auth |
 |---|---|---|
-| `agy-call` | `agy` (Antigravity CLI) | `agy install`, then Google sign-in |
-| `kiro-call` | `kiro-cli` (AWS Kiro CLI) | `kiro-cli login` |
-| `codex-call` | `codex` | `codex login` (ChatGPT) or `OPENAI_API_KEY` env var |
-| `notebooklm-call` | Python 3.10+, `notebooklm` CLI | `notebooklm login` (browser, one-time) |
-| `claude-call` | `claude` (Claude Code) | `claude auth login` or `ANTHROPIC_API_KEY` env var |
+| `agy` | `agy` (Antigravity CLI) | `agy install`, then Google sign-in |
+| `kiro` | `kiro-cli` (AWS Kiro CLI) | `kiro-cli login` |
+| `codex` | `codex` | `codex login` (ChatGPT) or `OPENAI_API_KEY` env var |
+| `notebooklm` | Python 3.10+, `notebooklm` CLI | `notebooklm login` (browser, one-time) |
+| `claude` | `claude` (Claude Code) | `claude auth login` or `ANTHROPIC_API_KEY` env var |
 
 ### 4-2. Clone
 
@@ -93,18 +107,17 @@ cd cc-agent-call
 
 ### 4-3. Run the installer
 
-`install.sh` creates **symlinks** from this repo's `skills/<name>` into the host CLI's skill directory (`~/.claude/skills/<name>` or `~/.codex/skills/<name>`). Because they're symlinks (not copies), a `git pull` here is immediately visible to the host.
+`install.sh` creates a **symlink** from this repo's `skills/call-agent` into the host CLI's skill directory. Because it is linked into **both** `~/.claude/skills` and `~/.codex/skills`, whichever CLI you run can reach the other targets. Since they're symlinks (not copies), a `git pull` here is immediately visible to the host.
 
 ```bash
-./install.sh                # install all 5 skills
-./install.sh agy-call       # install just one
+./install.sh                # link call-agent into both host skill dirs
 ./install.sh --dry-run      # show what would be linked, don't actually link
-./install.sh --uninstall    # remove every symlink this script created
+./install.sh --uninstall    # remove the call-agent link (and any legacy *-call links)
 ```
 
 After install, open a fresh session of your host CLI (Claude Code, etc.) and the skill is auto-loaded.
 
-> Note: `notebooklm-call` works in both Claude Code and Codex, so it gets linked into both directories.
+> Migrating from the old five-skill layout? `./install.sh --uninstall` removes the stale `agy-call` / `codex-call` / … symlinks too, then `./install.sh` links the single `call-agent`.
 
 ---
 
@@ -116,57 +129,53 @@ Scenario: **You're working in Claude Code and you need a hero illustration for a
 > Generate an abstract illustration for the top of my README. 1:1 ratio.
 ```
 
-Claude Code cannot generate images natively. The installed `codex-call` skill fires and does the following automatically:
+Claude Code cannot generate images natively. The `call-agent` skill fires and:
 
-1. Reshapes your prompt for Codex and shells out to `codex`.
-2. Codex generates the image via `gpt-image-2`.
+1. Classifies "image generation" → routes to the `codex` target, loading `reference/codex/call.md`.
+2. Reshapes your prompt for Codex and shells out to `codex`, which generates the image via `gpt-image-2`.
 3. The resulting file path is returned and reported back in the Claude Code thread.
 
 You never switched terminals.
 
 Other examples:
 
-- "Have agy search 'gpt-image-2 pricing'" → `agy-call` answers with Google Search grounding.
-- "Bundle these 5 PDFs in NotebookLM and ask about 'the Section 3 conclusion'" → `notebooklm-call` builds the corpus and queries.
+- "Have agy search 'gpt-image-2 pricing'" → routes to `agy`, answered with Google Search grounding.
+- "Bundle these 5 PDFs in NotebookLM and ask about 'the Section 3 conclusion'" → routes to `notebooklm`, builds the corpus and queries.
 
 ---
 
 ## 6. Why the trigger policy is conservative
 
-Each `SKILL.md` contains a policy block similar to:
-
-> Use ONLY when the user explicitly says "codex" / "kiro" / "agy" / "notebooklm", OR the task is image generation / NL-to-shell / scientific DB / document RAG. Do NOT use for routine code edits, planning, or analysis that the host can do natively.
-
-**Why so strict?**
+The router fires delegation only on an explicit tool name or a real host-capability gap. The reasons:
 
 - Calling an external CLI usually spends a separate token / credit balance.
 - Outsourcing work the host already does well makes responses slower.
 - Frequent automatic hand-offs make it hard for you to trace what your tool is actually doing right now.
 
-So the keywords are deliberately narrow — delegation fires only when it clearly pays off.
+So the keywords are deliberately narrow — delegation fires only when it clearly pays off, and never to the host CLI itself.
 
 ---
 
 ## 7. Tests
 
-Sanity-check the install:
+Sanity-check the install. The suite runs each target's smoke test in turn:
 
 ```bash
-./tests/run-all.sh                 # L0 + L1: binary present, --help works
+./tests/run-all.sh                 # L0 + L1: binary present, --help works, scripts parse
 RUN_L2=1 ./tests/run-all.sh        # adds L2: real round-trip prompts (uses credits)
 RUN_L3=1 ./tests/run-all.sh        # adds L3: core features (image gen, etc.) (uses credits)
-RUN_L4=1 ./tests/run-all.sh        # adds L4: long-running async jobs (codex-call) (uses credits)
+RUN_L4=1 ./tests/run-all.sh        # adds L4: long-running async jobs (codex) (uses credits)
 ```
 
-A skill whose CLI isn't installed is reported as **SKIP**, not FAIL — so a
+A target whose CLI isn't installed is reported as **SKIP**, not FAIL — so a
 partial install (e.g. only `codex` + `claude`) still ends in `RESULT: OK`.
 The suite only fails on a real error.
 
-Per-skill smoke tests:
+Per-target smoke tests:
 
 ```bash
-./skills/agy-call/tests/smoke.sh
-./skills/codex-call/tests/smoke.sh
+./skills/call-agent/reference/agy/tests/smoke.sh
+./skills/call-agent/reference/codex/tests/smoke.sh
 # ... etc.
 ```
 
@@ -179,11 +188,13 @@ L2 and L3 hit real external models and may incur cost. For CI, leave only L0/L1 
 **Q. I don't use a host CLI — can't I just use the external CLI directly?**
 Yes. This repo is only useful when you want to **stay inside the host CLI's flow** while occasionally calling out. For standalone use, just run the target CLI directly.
 
-**Q. I don't want skills auto-firing.**
-Disable the skill in the host CLI's settings, or simply run `./install.sh --uninstall` to drop the symlinks. The repo itself can stay in place.
+**Q. I don't want the skill auto-firing.**
+Disable `call-agent` in the host CLI's settings, or simply run `./install.sh --uninstall` to drop the symlink. The repo itself can stay in place.
 
 **Q. Can I add a brand-new CLI (e.g. some next-gen tool)?**
-Yes. Create `skills/<new-name>/SKILL.md` and add a case in `install.sh`'s `declare_targets()` mapping it to the right host directory.
+Yes, and it's now a two-step edit — no installer change needed:
+1. Create `skills/call-agent/reference/<new-name>/call.md` (invocation details, preflight, scripts).
+2. Add one row to the **Route** table in `skills/call-agent/SKILL.md`.
 
 **Q. What about security?**
 This repo stores no tokens. Each CLI authenticates the standard way for that tool (config file or env var).

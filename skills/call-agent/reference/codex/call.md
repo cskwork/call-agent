@@ -1,27 +1,17 @@
----
-name: codex-call
-description: Delegate to OpenAI Codex CLI for capabilities Claude Code lacks. Use ONLY when the user explicitly says "codex", OR when the task is image generation (Codex has the highest-quality option via the built-in image_gen tool and gpt-image-2). May also be used for a one-shot code review (`codex review`) when the user explicitly asks. Do NOT use for routine edits, planning, or analysis Claude Code can do natively.
-allowed-tools:
-  - Bash
-  - Read
-  - Write
-  - Grep
-  - Glob
----
+# call-agent -> codex (OpenAI Codex CLI)
 
-# codex-call
+Loaded by the `call-agent` router when delegating to `codex`. Shell out to
+OpenAI Codex CLI (`codex`) for things the host CLI does not do natively —
+primarily **image generation**, secondarily one-shot **code review** with
+diff scoping.
 
-Shell out to OpenAI Codex CLI (`codex`) for things Claude Code does not
-do natively — primarily **image generation**, secondarily one-shot
-**code review** with diff scoping.
-
-## When this skill fires
+## When to route here
 
 1. **Explicit name** — user mentions "codex".
-2. **Feature gap** — user asks for image generation (Claude Code cannot
+2. **Feature gap** — user asks for image generation (the host cannot
    do this; Codex has the best built-in option).
 
-Do NOT fire for routine code work — Claude Code handles those.
+Do NOT route here for routine code work — the host CLI handles those.
 
 ## Preflight
 

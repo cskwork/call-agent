@@ -1,69 +1,63 @@
 #!/usr/bin/env bash
-# install.sh — symlink cc-agent-call skills into ~/.claude/skills and ~/.codex/skills.
+# install.sh — symlink the call-agent skill into ~/.claude/skills and ~/.codex/skills.
+# call-agent is a single router skill that delegates to peer AI CLIs (codex, agy,
+# kiro, claude, notebooklm). It links into BOTH host dirs so whichever CLI you run
+# can reach the others.
 # Usage:
-#   ./install.sh                   # install all skills
-#   ./install.sh agy-call          # install just one skill
-#   ./install.sh --dry-run         # show what would be linked
-#   ./install.sh --uninstall       # remove all symlinks created here
+#   ./install.sh                   # link call-agent into both host skill dirs
+#   ./install.sh --dry-run         # show what would be linked, do nothing
+#   ./install.sh --uninstall       # remove call-agent links + legacy *-call links
 set -uo pipefail
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
-CLAUDE_DIR="$HOME/.claude/skills"
-CODEX_DIR="$HOME/.codex/skills"
+SKILL="call-agent"
+SRC="$REPO_DIR/skills/$SKILL"
+TARGET_DIRS="$HOME/.claude/skills
+$HOME/.codex/skills"
 
-# host targets per skill (newline-separated; macOS bash 3.2 compatible)
-declare_targets() {
-  case "$1" in
-    agy-call|kiro-call|codex-call) printf '%s\n' "$CLAUDE_DIR" ;;
-    claude-call)                   printf '%s\n' "$CODEX_DIR"  ;;
-    notebooklm-call)               printf '%s\n%s\n' "$CLAUDE_DIR" "$CODEX_DIR" ;;
-    *) return 1 ;;
-  esac
-}
-
-ALL_SKILLS="agy-call kiro-call codex-call notebooklm-call claude-call"
+# legacy per-CLI skills replaced by call-agent — cleaned up on --uninstall so a
+# re-install does not leave stale, now-broken symlinks behind.
+LEGACY_SKILLS="agy-call kiro-call codex-call notebooklm-call claude-call"
 
 DRY=0
 UNINSTALL=0
-SELECTED=""
-
 for a in "$@"; do
   case "$a" in
     --dry-run)   DRY=1 ;;
     --uninstall) UNINSTALL=1 ;;
-    -h|--help)
-      sed -n '1,12p' "$0"
-      exit 0
-      ;;
-    *) SELECTED="$SELECTED $a" ;;
+    -h|--help)   sed -n '1,8p' "$0"; exit 0 ;;
+    *) echo "ignoring '$a' — call-agent is the only skill" >&2 ;;
   esac
 done
-SELECTED="${SELECTED:-$ALL_SKILLS}"
 
 run() { [ "$DRY" = "1" ] && echo "DRY: $*" || eval "$*"; }
 
-for skill in $SELECTED; do
-  src="$REPO_DIR/skills/$skill"
-  if [ ! -d "$src" ]; then
-    echo "skip $skill: not found at $src" >&2
+# remove a path only when it is a symlink (never delete a real dir/file)
+rm_link() {
+  if [ -L "$1" ]; then
+    run "rm '$1' && echo 'removed $1'"
+  elif [ -e "$1" ]; then
+    echo "skip $1: not a symlink (will not delete)"
+  fi
+}
+
+if [ ! -d "$SRC" ]; then
+  echo "error: $SRC not found" >&2
+  exit 1
+fi
+
+printf '%s\n' "$TARGET_DIRS" | while IFS= read -r tdir; do
+  [ -z "$tdir" ] && continue
+  link="$tdir/$SKILL"
+  if [ "$UNINSTALL" = "1" ]; then
+    rm_link "$link"
+    for ls in $LEGACY_SKILLS; do rm_link "$tdir/$ls"; done
     continue
   fi
-  declare_targets "$skill" | while IFS= read -r tdir; do
-    [ -z "$tdir" ] && continue
-    link="$tdir/$skill"
-    if [ "$UNINSTALL" = "1" ]; then
-      if [ -L "$link" ]; then
-        run "rm '$link' && echo 'removed $link'"
-      else
-        echo "skip $link: not a symlink (will not delete)"
-      fi
-      continue
-    fi
-    run "mkdir -p '$tdir'"
-    if [ -e "$link" ] && [ ! -L "$link" ]; then
-      echo "skip $link: exists and is not a symlink (refusing to overwrite)"
-      continue
-    fi
-    run "ln -snf '$src' '$link' && echo 'linked $link -> $src'"
-  done
+  run "mkdir -p '$tdir'"
+  if [ -e "$link" ] && [ ! -L "$link" ]; then
+    echo "skip $link: exists and is not a symlink (refusing to overwrite)"
+    continue
+  fi
+  run "ln -snf '$SRC' '$link' && echo 'linked $link -> $SRC'"
 done
