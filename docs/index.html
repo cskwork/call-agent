@@ -6,7 +6,7 @@
   <title>call-agent — Cross-CLI delegation skills</title>
   <meta name="description" content="Let one agentic CLI (Claude Code or Codex) shell out to another (agy, kiro, codex, NotebookLM, Claude Code) when the target tool has a feature the host lacks." />
   <meta property="og:title" content="call-agent" />
-  <meta property="og:description" content="Cross-CLI delegation: Claude Code / Codex / agy / kiro-cli / NotebookLM. One router skill, five targets, each fully tested." />
+  <meta property="og:description" content="Cross-CLI delegation: Claude Code / Codex / agy / kiro-cli / NotebookLM / ChatGPT Pro. One router skill, six targets, each fully tested." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://cskwork.github.io/call-agent/" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E" />
@@ -171,18 +171,18 @@
       <div class="eyebrow">// cross-cli delegation skills</div>
 
       <div class="i18n-en">
-        <h1>One agentic CLI, <span class="grad">five tools at its back.</span></h1>
+        <h1>One agentic CLI, <span class="grad">six tools at its back.</span></h1>
         <p class="lede">
           A single "delegation skill" that lets the AI CLI you have open (Claude Code or Codex)
-          shell out to <b>agy</b>, <b>kiro-cli</b>, <b>codex</b>, <b>NotebookLM</b>, or <b>Claude Code</b>
+          shell out to <b>agy</b>, <b>kiro-cli</b>, <b>codex</b>, <b>NotebookLM</b>, <b>Claude Code</b>, or <b>ChatGPT Pro</b>
           when the other tool is genuinely better at the task — without you leaving the terminal.
         </p>
       </div>
       <div class="i18n-ko">
-        <h1>한 개의 CLI 안에서, <span class="grad">다섯 도구를 부린다.</span></h1>
+        <h1>한 개의 CLI 안에서, <span class="grad">여섯 도구를 부린다.</span></h1>
         <p class="lede">
           지금 켜놓은 AI CLI(Claude Code 또는 Codex)가 못 하는 일을 다른 CLI
-          (<b>agy</b>, <b>kiro-cli</b>, <b>codex</b>, <b>NotebookLM</b>, <b>Claude Code</b>) 에게
+          (<b>agy</b>, <b>kiro-cli</b>, <b>codex</b>, <b>NotebookLM</b>, <b>Claude Code</b>, <b>ChatGPT Pro</b>) 에게
           <b>자동으로 떠넘기게</b> 해 주는 단일 "위임 스킬" 입니다. 터미널을 갈아탈 필요가 없습니다.
         </p>
       </div>
@@ -193,7 +193,7 @@
         <a class="btn" href="#skills"><span class="i18n-en">See skills</span><span class="i18n-ko">스킬 보기</span></a>
       </div>
       <div class="pills">
-        <span class="pill">1 skill · 5 targets</span>
+        <span class="pill">1 skill · 6 targets</span>
         <span class="pill">Claude Code + Codex hosts</span>
         <span class="pill">MIT licensed</span>
         <span class="pill">L0 / L1 / L2 / L3 tests</span>
@@ -296,7 +296,7 @@
   <!-- ========================= SKILLS ========================= -->
   <section id="skills">
     <div class="wrap">
-      <h2><span class="i18n-en">One skill, five targets</span><span class="i18n-ko">스킬 하나, 다섯 타깃</span></h2>
+      <h2><span class="i18n-en">One skill, six targets</span><span class="i18n-ko">스킬 하나, 여섯 타깃</span></h2>
       <p class="sub">
         <span class="i18n-en"><code>call-agent</code> is one router <code>SKILL.md</code>; each target lives in <code>reference/&lt;name&gt;/</code> and loads only when routed to.</span>
         <span class="i18n-ko"><code>call-agent</code>은 라우터 <code>SKILL.md</code> 한 장 — 각 타깃은 <code>reference/&lt;name&gt;/</code>에 있고 라우팅될 때만 로드.</span>
@@ -346,6 +346,15 @@
           </div>
           <p class="i18n-en">Claude Code — 1M-context plan-mode planning and deep code review delegated from inside Codex.</p>
           <p class="i18n-ko">Claude Code — Codex 사용자가 1M 컨텍스트 기획(plan-mode)이나 대형 코드베이스 심층 리뷰가 필요할 때 사용.</p>
+        </div>
+
+        <div class="card">
+          <div class="row">
+            <h3><a href="https://github.com/cskwork/call-agent/tree/master/skills/call-agent/reference/gpt-pro">gpt-pro</a></h3>
+            <span class="badge both">needs ChatGPT Pro</span>
+          </div>
+          <p class="i18n-en">ChatGPT Pro — packages a sanitized context bundle (prompt + files, secrets stripped) for a deep-reasoning second opinion via your flat-fee subscription; optional experimental live browser drive.</p>
+          <p class="i18n-ko">ChatGPT Pro — 시크릿을 제거한 컨텍스트 번들(프롬프트 + 파일)을 만들어 정액 구독으로 딥리즈닝 2차 의견을 받음. 실험적 라이브 브라우저 드라이브 옵션.</p>
         </div>
 
       </div>

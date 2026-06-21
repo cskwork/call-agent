@@ -12,7 +12,7 @@ set -u
 
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 # call-agent bundles every peer CLI as reference/<agent>/; each keeps its own smoke test.
-AGENTS=(agy kiro codex notebooklm claude)
+AGENTS=(agy kiro codex notebooklm claude gpt-pro)
 
 passed=""; skipped=""; failed=""
 for s in "${AGENTS[@]}"; do
