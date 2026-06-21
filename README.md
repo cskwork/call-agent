@@ -75,6 +75,7 @@ Routine work (`review this code`, `plan this feature`) does **not** trigger dele
 | `kiro` | AWS Kiro CLI (`kiro-cli`) | Natural-language → shell translation, MCP cross-registry, second opinion via AWS Bedrock | "kiro", "kiro-cli" |
 | `claude` | Claude Code | 1M-context plan-mode planning, deep large-codebase review (for a non-Claude host) | "claude", "claude code" |
 | `notebooklm` | Google NotebookLM | RAG over PDF/URL/YouTube corpora, audio overviews | "notebooklm", "nblm" |
+| `gpt-pro` | ChatGPT Pro (web) | Deep-reasoning second opinion packaged as a sanitized bundle for manual paste into ChatGPT Pro (flat-fee subscription, no API cost); optional experimental live browser drive | "gpt-pro", "chatgpt pro", "gpt5 pro" |
 
 Each target's exact invocation, flags, and wrapper scripts live in `skills/call-agent/reference/<target>/`. The router (`skills/call-agent/SKILL.md`) shows the full decision table.
 

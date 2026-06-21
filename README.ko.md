@@ -75,6 +75,7 @@
 | `kiro` | AWS Kiro CLI(`kiro-cli`) | 자연어 → 셸 번역, MCP 서버 교차 등록, AWS Bedrock 모델 2차 의견 | "kiro", "kiro-cli" |
 | `claude` | Claude Code | 1M 컨텍스트 plan-mode 기획, 대형 코드베이스 심층 리뷰(비-Claude 호스트용) | "claude", "claude code" |
 | `notebooklm` | Google NotebookLM | PDF/URL/YouTube corpus RAG, 오디오 개요 | "notebooklm", "nblm" |
+| `gpt-pro` | ChatGPT Pro(웹) | ChatGPT Pro 딥리즈닝 2차 의견 — 시크릿 제거된 컨텍스트 번들을 만들어 chatgpt.com에 수동 붙여넣기(정액 구독, API 비용 없음). 실험적 라이브 브라우저 드라이브 옵션 | "gpt-pro", "chatgpt pro", "gpt5 pro" |
 
 각 타깃의 정확한 호출법·플래그·래퍼 스크립트는 `skills/call-agent/reference/<target>/`에 있습니다. 전체 결정 표는 라우터 `skills/call-agent/SKILL.md`에서 볼 수 있습니다.
 
