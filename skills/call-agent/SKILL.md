@@ -12,7 +12,7 @@ allowed-tools:
 # call-agent - delegate to a peer AI CLI
 
 Router. You (the host CLI) hand ONE task to a peer agentic CLI when the peer does it
-better, then report the result back. This file is a router; load only the one
+better, then report the result back. Load only the one
 `reference/<target>/call.md` you route to - never all of them.
 
 ## Rule zero - never call yourself
