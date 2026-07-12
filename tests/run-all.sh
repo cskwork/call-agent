@@ -2,6 +2,7 @@
 # tests/run-all.sh — run every skill's smoke test in turn.
 # Env passthrough:
 #   RUN_L2=1   include round-trip prompts (uses credit)
+#   RUN_L2_SHELL=1 include Claude shell-capability probe (uses credit)
 #   RUN_L3=1   include feature exercises (image gen, RAG, etc.)
 #   RUN_L4=1   include long-running async jobs (codex-call; uses credit)
 #
