@@ -1,6 +1,6 @@
 ---
 name: call-agent
-description: Delegate the current task to a peer AI CLI when it is better suited than the host you are running in. Targets - OpenAI Codex ("codex"), Google Antigravity ("agy"/"antigravity"/"gemini cli"), AWS Kiro ("kiro"/"kiro-cli"), Claude Code ("claude"/"claude code"), Google NotebookLM ("notebooklm"/"nblm"), ChatGPT Pro ("gpt-pro"/"chatgpt pro"). Use when the user names one of those tools, OR asks for a capability the host lacks - image generation, web search with Google grounding, natural-language-to-shell translation, document RAG over PDFs/URLs/YouTube, scientific-database queries (gnomAD/UniProt/PubMed), 1M-token-context planning, or a deep second-opinion review from a different model (incl. ChatGPT Pro deep reasoning). Do NOT use for routine code edits, planning, or analysis the host can do natively.
+description: Delegate one task to a named peer CLI, or when the host lacks the required capability.
 allowed-tools:
   - Bash
   - Read
@@ -38,7 +38,7 @@ capable. When the win is unclear, ask before spending a peer's credits.
 | "codex"; image generation; one-shot `codex review` | codex | `codex` | `reference/codex/call.md` |
 | "agy" / "antigravity" / "gemini cli"; Google-grounded web search; image gen; science DB (gnomAD/UniProt/PubMed/ChEMBL) | agy | `agy` | `reference/agy/call.md` |
 | "kiro" / "kiro-cli"; natural-language -> shell `translate`; MCP cross-register; AWS Bedrock peer opinion | kiro | `kiro-cli` | `reference/kiro/call.md` |
-| "claude" / "claude code"; 1M-context planning; plan-mode (read-only) architecture; deep `--effort high` review | claude | `claude` | `reference/claude/call.md` |
+| "claude" / "claude code"; implementation; 1M-context planning; deep review | claude | `claude` | `reference/claude/call.md` |
 | "notebooklm" / "nblm"; RAG / audio / mind-map over a PDF/URL/YouTube corpus | notebooklm | `notebooklm` | `reference/notebooklm/call.md` |
 | "gpt-pro" / "chatgpt pro" / "gpt5 pro"; deep-reasoning second opinion packaged for ChatGPT Pro (web, flat-fee subscription) | gpt-pro | none (`tar`/`pbcopy`) | `reference/gpt-pro/call.md` |
 
@@ -48,9 +48,9 @@ generation is offered by both `codex` (gpt-image-2, ChatGPT-auth, highest qualit
 
 ## Preflight (every route)
 
-Each `call.md` opens with a preflight (binary on PATH + auth). Run it first. If the
-target binary is missing, surface that target's install hint verbatim and STOP - do NOT
-silently fall back to another peer or fake the capability.
+Each `call.md` defines its preflight. Run it before sending the task. Claude
+implementation requires both auth and shell-capability preflights. If the host blocks
+the target, report the normal-terminal fallback instead of retrying with weaker safety.
 
 ## Reference map (load only what the routed target needs)
 
@@ -62,6 +62,6 @@ silently fall back to another peer or fake the capability.
 | `reference/agy/templates.md` | need copy-paste agy prompt scaffolds |
 | `reference/<target>/scripts/*.sh` | the routed call.md tells you to run a wrapper script |
 
-**Done =** target named in one line; preflight passed; the peer's output captured and
-reported back verbatim (with cost / session id when the CLI returns it); any generated
-file verified to exist; no silent fallback, no faked capability.
+**Done =** target named; route-specific preflight passed; output and cost/session id
+reported; generated files verified. A blocked target ends with an actionable fallback,
+never a success claim.

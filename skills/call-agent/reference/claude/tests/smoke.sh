@@ -20,7 +20,7 @@ else
 fi
 
 # L1 — wrapper scripts syntax-valid + help works
-for s in scripts/preflight-auth.sh scripts/claude-plan.sh scripts/claude-review.sh; do
+for s in scripts/preflight-auth.sh scripts/preflight-shell.sh scripts/claude-implement.sh scripts/claude-plan.sh scripts/claude-review.sh; do
   if bash -n "$SCRIPT_DIR/$s"; then
     note "L1a ok: $s syntax"
   else
@@ -33,6 +33,27 @@ else
   fail "L1b: claude --help failed"
 fi
 
+if grep -Eq 'dangerously-skip-permissions|bypassPermissions' \
+  "$SCRIPT_DIR/scripts/claude-implement.sh" "$SCRIPT_DIR/scripts/preflight-shell.sh"; then
+  fail "L1d: Claude write path weakens permission checks"
+else
+  note "L1d ok: Claude write path keeps permission checks"
+fi
+
+if grep -q -- '--max-budget-usd 0.05' "$SCRIPT_DIR/scripts/preflight-shell.sh"; then
+  note "L1e ok: shell probe cost capped"
+else
+  fail "L1e: shell probe needs a cost cap"
+fi
+
+if grep -q -- '--safe-mode' "$SCRIPT_DIR/scripts/preflight-shell.sh" \
+  && grep -q -- '--tools Bash' "$SCRIPT_DIR/scripts/preflight-shell.sh" \
+  && grep -q -- '--max-turns 4' "$SCRIPT_DIR/scripts/preflight-shell.sh"; then
+  note "L1f ok: shell probe context minimized"
+else
+  fail "L1f: shell probe must isolate configuration and tools"
+fi
+
 # L1c — preflight runs (may exit 2 if no auth; that's the "warn" path)
 if "$SCRIPT_DIR/scripts/preflight-auth.sh" >/dev/null 2>&1; then
   note "L1c ok: preflight passed (auth present)"
@@ -40,6 +61,15 @@ if "$SCRIPT_DIR/scripts/preflight-auth.sh" >/dev/null 2>&1; then
 else
   note "L1c warn: preflight reports no auth — run \`claude auth login\`"
   HAVE_AUTH=0
+fi
+
+# L2s — shell-capability probe (small model call)
+if [ "${RUN_L2_SHELL:-0}" = "1" ] && [ "$HAVE_AUTH" = "1" ]; then
+  if "$SCRIPT_DIR/scripts/preflight-shell.sh"; then
+    note "L2s ok: shell capability"
+  else
+    fail "L2s: shell capability unavailable"
+  fi
 fi
 
 # L2 — actual claude -p round-trip

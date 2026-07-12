@@ -1,19 +1,21 @@
 # call-agent -> claude (Claude Code)
 
 Loaded by the `call-agent` router when delegating to `claude`. Lets the
-host CLI shell out to Claude Code (`claude -p`) when Claude has a
-capability worth the extra hop (1M-token context, plan-mode, deep review).
+host CLI shell out to Claude Code (`claude -p`) for implementation, large-context
+planning, or deep review.
 
 ## When to route here
 
 1. **Explicit name** — user says "claude" or "claude code".
 2. **Feature gap** — user asks for:
+   - An implementation pass from Claude Code
    - Planning over a very large codebase that benefits from Claude's
      1M-token context window
    - A plan-mode (guaranteed read-only) architecture pass
    - A deep code review (`--effort high`) for a second opinion
 
-Do NOT route here for routine code edits — the host CLI handles those.
+Route implementation only when the user explicitly asks for Claude; otherwise the host
+handles routine edits.
 
 ## Preflight
 
@@ -23,6 +25,32 @@ Do NOT route here for routine code edits — the host CLI handles those.
 
 Verifies `claude` is on PATH and either Claude-Max OAuth is active or
 `ANTHROPIC_API_KEY` is set.
+
+Implementation also runs a minimal shell probe before sharing the real task:
+
+```bash
+./scripts/preflight-shell.sh
+```
+
+The probe asks Claude to run `pwd`. It catches hosts where Claude is authenticated but
+cannot initialize its Bash session. It uses a small model call and may incur a small cost.
+
+## Implementation (workspace edits)
+
+```bash
+./scripts/claude-implement.sh "<TASK DESCRIPTION>"
+```
+
+The wrapper runs both preflights, then gives Claude normal `acceptEdits` permissions in
+the current workspace. It does not commit, push, or deploy unless the task explicitly
+requests that action.
+
+### Host-policy boundary
+
+The skill cannot weaken the host platform's sandbox or approval policy. When the shell
+probe is blocked, stop the delegated run and tell the user to open a normal terminal,
+change to the workspace, and rerun `claude-implement.sh` with the same task. Keep Claude's
+standard permission checks enabled.
 
 ## Planning (read-only)
 
@@ -99,5 +127,7 @@ If the preflight reports neither, surface this verbatim:
 ## See also
 
 - [`scripts/preflight-auth.sh`](scripts/preflight-auth.sh)
+- [`scripts/preflight-shell.sh`](scripts/preflight-shell.sh)
+- [`scripts/claude-implement.sh`](scripts/claude-implement.sh)
 - [`scripts/claude-plan.sh`](scripts/claude-plan.sh)
 - [`scripts/claude-review.sh`](scripts/claude-review.sh)
