@@ -13,7 +13,6 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 "$SCRIPT_DIR/preflight-auth.sh" >/dev/null || exit 2
 source "$SCRIPT_DIR/claude-mcp-tools.sh"
 load_claude_allowed_tools \
-  Read Grep Glob \
   'Bash(git diff:*)' 'Bash(git log:*)' 'Bash(git show:*)' 'Bash(git status:*)'
 
 PROMPT="$*"
@@ -22,7 +21,8 @@ SYS="You are a strict code reviewer. Find correctness, security, and design bugs
 OUT_JSON=$(claude -p --print \
   --model opus \
   --effort high \
-  --permission-mode plan \
+  --permission-mode dontAsk \
+  --tools Read,Grep,Glob,Bash \
   "${CLAUDE_ALLOWED_TOOLS_ARGS[@]+"${CLAUDE_ALLOWED_TOOLS_ARGS[@]}"}" \
   --output-format json \
   --no-session-persistence \

@@ -76,7 +76,8 @@ Underlying call:
 ```bash
 claude -p --print \
   --model opus --effort high \
-  --permission-mode plan \
+  --permission-mode dontAsk \
+  --tools Read,Grep,Glob \
   "${CLAUDE_ALLOWED_TOOLS_ARGS[@]+"${CLAUDE_ALLOWED_TOOLS_ARGS[@]}"}" \
   --output-format json \
   --no-session-persistence \
@@ -99,7 +100,8 @@ Underlying call:
 ```bash
 claude -p --print \
   --model opus --effort high \
-  --permission-mode plan \
+  --permission-mode dontAsk \
+  --tools Read,Grep,Glob,Bash \
   "${CLAUDE_ALLOWED_TOOLS_ARGS[@]+"${CLAUDE_ALLOWED_TOOLS_ARGS[@]}"}" \
   --output-format json \
   --no-session-persistence \
@@ -107,6 +109,12 @@ claude -p --print \
   --append-system-prompt "You are a strict code reviewer. Find correctness, security, and design bugs in the diff. Cite file:line." \
   "$PROMPT"
 ```
+
+`dontAsk` permits pre-approved MCP calls in headless mode while automatically denying
+anything that would prompt. Planning exposes only `Read`, `Grep`, and `Glob`. Review also
+exposes `Bash`, but pre-approves only `git diff`, `git log`, `git show`, and `git status`;
+other Bash commands that require approval are denied instead of prompting. Neither role
+exposes `Edit` or `Write`.
 
 ## Output handling
 
