@@ -45,6 +45,19 @@ The wrapper runs both preflights, then gives Claude normal `acceptEdits` permiss
 the current workspace. It does not commit, push, or deploy unless the task explicitly
 requests that action.
 
+## MCP permissions
+
+Planning, review, and implementation discover configured servers with `claude mcp list`
+before the delegated call. Each server name is decoded explicitly as UTF-8, normalized to
+Claude's ASCII tool-name format, and passed as a server-level rule such as
+`mcp__codebase-memory-mcp`, which allows every tool exposed by that server. Explicit UTF-8
+decoding keeps the result stable even when the wrapper runs in the `C` locale.
+
+The wrappers enumerate server prefixes because the approved legacy compatibility target
+does not support one MCP wildcard rule. They do not use `bypassPermissions`, which would
+also disable unrelated safety prompts. If server discovery fails, no MCP rules are added
+and the original Claude call continues with its existing permissions.
+
 ### Host-policy boundary
 
 The skill cannot weaken the host platform's sandbox or approval policy. When the shell
@@ -64,6 +77,7 @@ Underlying call:
 claude -p --print \
   --model opus --effort high \
   --permission-mode plan \
+  "${CLAUDE_ALLOWED_TOOLS_ARGS[@]+"${CLAUDE_ALLOWED_TOOLS_ARGS[@]}"}" \
   --output-format json \
   --no-session-persistence \
   --add-dir "$PWD" \
@@ -86,7 +100,7 @@ Underlying call:
 claude -p --print \
   --model opus --effort high \
   --permission-mode plan \
-  --allowedTools "Read Grep Glob Bash(git diff:*) Bash(git log:*) Bash(git show:*)" \
+  "${CLAUDE_ALLOWED_TOOLS_ARGS[@]+"${CLAUDE_ALLOWED_TOOLS_ARGS[@]}"}" \
   --output-format json \
   --no-session-persistence \
   --add-dir "$PWD" \

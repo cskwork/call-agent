@@ -20,7 +20,7 @@ else
 fi
 
 # L1 — wrapper scripts syntax-valid + help works
-for s in scripts/preflight-auth.sh scripts/preflight-shell.sh scripts/claude-implement.sh scripts/claude-plan.sh scripts/claude-review.sh; do
+for s in scripts/preflight-auth.sh scripts/preflight-shell.sh scripts/claude-mcp-tools.sh scripts/claude-implement.sh scripts/claude-plan.sh scripts/claude-review.sh; do
   if bash -n "$SCRIPT_DIR/$s"; then
     note "L1a ok: $s syntax"
   else
@@ -53,6 +53,99 @@ if grep -q -- '--safe-mode' "$SCRIPT_DIR/scripts/preflight-shell.sh" \
 else
   fail "L1f: shell probe must isolate configuration and tools"
 fi
+
+# L1g — every wrapper allows all configured MCP servers, with a safe fallback
+MCP_TEST_LOG=$(mktemp "${TMPDIR:-/tmp}/claude-mcp-test.XXXXXX")
+claude() {
+  if [ "${1:-}" = "auth" ] && [ "${2:-}" = "status" ]; then
+    printf '%s\n' '{"loggedIn":true,"authMethod":"test"}'
+    return 0
+  fi
+  if [ "${1:-}" = "mcp" ] && [ "${2:-}" = "list" ]; then
+    [ "${CLAUDE_MCP_LIST_FAIL:-0}" = "1" ] && return 1
+    printf '%s\n' \
+      'Checking MCP server health…' \
+      '' \
+      'team server: https://example.test/mcp - ✔ Connected' \
+      'claude.ai Figma: https://figma.example.test/mcp - ✔ Connected' \
+      '한글.server: npx unicode-mcp - ✔ Connected' \
+      'plugin:demo:tools: npx demo-mcp - ✘ Failed to connect'
+    return 0
+  fi
+
+  case " $* " in
+    *" --model opus "*)
+      for arg in "$@"; do
+        printf 'ARG=%s\n' "$arg" >>"$MCP_TEST_LOG"
+      done
+      ;;
+  esac
+  case " $* " in
+    *" Run pwd with Bash. "*) printf '%s\n' '{"result":"SHELL_OK"}' ;;
+    *) printf '%s\n' '{"result":"OK"}' ;;
+  esac
+}
+export -f claude
+export MCP_TEST_LOG
+
+check_mcp_wrapper() {
+  local wrapper=$1 expected=$2 list_fail=$3
+  : >"$MCP_TEST_LOG"
+  if LC_ALL=C CLAUDE_MCP_LIST_FAIL="$list_fail" "$SCRIPT_DIR/scripts/$wrapper" test >/dev/null 2>&1; then
+    :
+  else
+    fail "L1g: $wrapper must still call Claude when MCP discovery fails"
+    return
+  fi
+
+  if [ -n "$expected" ]; then
+    if grep -Fqx -- "ARG=$expected" "$MCP_TEST_LOG"; then
+      :
+    else
+      fail "L1g: $wrapper allowed tools mismatch (list_fail=$list_fail)"
+      return
+    fi
+  elif grep -Fqx -- 'ARG=--allowedTools' "$MCP_TEST_LOG"; then
+    fail "L1g: $wrapper must omit an empty allowed-tools flag"
+    return
+  fi
+
+  if [ "$list_fail" = "0" ]; then
+    note "L1g ok: $wrapper allows each configured MCP server"
+  elif grep -Fq -- 'mcp__' "$MCP_TEST_LOG"; then
+    fail "L1g: $wrapper must not invent MCP permissions after discovery failure"
+  else
+    note "L1g ok: $wrapper preserves its prior call after MCP discovery failure"
+  fi
+}
+
+check_mcp_wrapper claude-plan.sh \
+  'mcp__team_server mcp__claude_ai_Figma mcp_____server mcp__plugin_demo_tools' 0
+check_mcp_wrapper claude-review.sh \
+  'Read Grep Glob Bash(git diff:*) Bash(git log:*) Bash(git show:*) Bash(git status:*) mcp__team_server mcp__claude_ai_Figma mcp_____server mcp__plugin_demo_tools' 0
+check_mcp_wrapper claude-implement.sh \
+  'Read Grep Glob Edit Write Bash mcp__team_server mcp__claude_ai_Figma mcp_____server mcp__plugin_demo_tools' 0
+check_mcp_wrapper claude-plan.sh '' 1
+check_mcp_wrapper claude-review.sh \
+  'Read Grep Glob Bash(git diff:*) Bash(git log:*) Bash(git show:*) Bash(git status:*)' 1
+check_mcp_wrapper claude-implement.sh 'Read Grep Glob Edit Write Bash' 1
+
+BASH32_NORMALIZED=$(LC_ALL=C /bin/bash -c '
+claude() {
+  printf "%s\n" "한글.server: npx unicode-mcp - ✔ Connected"
+}
+source "$1"
+load_claude_allowed_tools
+printf "%s\n" "${CLAUDE_ALLOWED_TOOLS_ARGS[*]}"
+' _ "$SCRIPT_DIR/scripts/claude-mcp-tools.sh")
+if [ "$BASH32_NORMALIZED" = '--allowedTools mcp_____server' ]; then
+  note "L1h ok: macOS Bash 3.2 C locale matches Claude's Unicode normalization"
+else
+  fail "L1h: macOS Bash 3.2 C-locale normalization mismatch: $BASH32_NORMALIZED"
+fi
+
+unset -f claude
+rm -f "$MCP_TEST_LOG"
 
 # L1c — preflight runs (may exit 2 if no auth; that's the "warn" path)
 if "$SCRIPT_DIR/scripts/preflight-auth.sh" >/dev/null 2>&1; then
