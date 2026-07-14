@@ -89,7 +89,7 @@ export -f claude
 export MCP_TEST_LOG
 
 check_mcp_wrapper() {
-  local wrapper=$1 expected=$2 list_fail=$3
+  local wrapper=$1 expected=$2 list_fail=$3 expected_mode=$4 expected_tools=$5
   : >"$MCP_TEST_LOG"
   if LC_ALL=C CLAUDE_MCP_LIST_FAIL="$list_fail" "$SCRIPT_DIR/scripts/$wrapper" test >/dev/null 2>&1; then
     :
@@ -110,6 +110,21 @@ check_mcp_wrapper() {
     return
   fi
 
+  if ! grep -Fqx -- "ARG=$expected_mode" "$MCP_TEST_LOG"; then
+    fail "L1g: $wrapper permission mode must be $expected_mode"
+    return
+  fi
+  if [ -n "$expected_tools" ]; then
+    if ! grep -Fqx -- 'ARG=--tools' "$MCP_TEST_LOG" \
+      || ! grep -Fqx -- "ARG=$expected_tools" "$MCP_TEST_LOG"; then
+      fail "L1g: $wrapper built-in tool surface must be $expected_tools"
+      return
+    fi
+  elif grep -Fqx -- 'ARG=--tools' "$MCP_TEST_LOG"; then
+    fail "L1g: $wrapper must preserve its existing built-in tool surface"
+    return
+  fi
+
   if [ "$list_fail" = "0" ]; then
     note "L1g ok: $wrapper allows each configured MCP server"
   elif grep -Fq -- 'mcp__' "$MCP_TEST_LOG"; then
@@ -120,15 +135,20 @@ check_mcp_wrapper() {
 }
 
 check_mcp_wrapper claude-plan.sh \
-  'mcp__team_server mcp__claude_ai_Figma mcp_____server mcp__plugin_demo_tools' 0
+  'mcp__team_server mcp__claude_ai_Figma mcp_____server mcp__plugin_demo_tools' \
+  0 dontAsk 'Read,Grep,Glob'
 check_mcp_wrapper claude-review.sh \
-  'Read Grep Glob Bash(git diff:*) Bash(git log:*) Bash(git show:*) Bash(git status:*) mcp__team_server mcp__claude_ai_Figma mcp_____server mcp__plugin_demo_tools' 0
+  'Bash(git diff:*) Bash(git log:*) Bash(git show:*) Bash(git status:*) mcp__team_server mcp__claude_ai_Figma mcp_____server mcp__plugin_demo_tools' \
+  0 dontAsk 'Read,Grep,Glob,Bash'
 check_mcp_wrapper claude-implement.sh \
-  'Read Grep Glob Edit Write Bash mcp__team_server mcp__claude_ai_Figma mcp_____server mcp__plugin_demo_tools' 0
-check_mcp_wrapper claude-plan.sh '' 1
+  'Read Grep Glob Edit Write Bash mcp__team_server mcp__claude_ai_Figma mcp_____server mcp__plugin_demo_tools' \
+  0 acceptEdits ''
+check_mcp_wrapper claude-plan.sh '' 1 dontAsk 'Read,Grep,Glob'
 check_mcp_wrapper claude-review.sh \
-  'Read Grep Glob Bash(git diff:*) Bash(git log:*) Bash(git show:*) Bash(git status:*)' 1
-check_mcp_wrapper claude-implement.sh 'Read Grep Glob Edit Write Bash' 1
+  'Bash(git diff:*) Bash(git log:*) Bash(git show:*) Bash(git status:*)' \
+  1 dontAsk 'Read,Grep,Glob,Bash'
+check_mcp_wrapper claude-implement.sh \
+  'Read Grep Glob Edit Write Bash' 1 acceptEdits ''
 
 BASH32_NORMALIZED=$(LC_ALL=C /bin/bash -c '
 claude() {
@@ -180,6 +200,38 @@ print(d.get("result",""))' \
     note "L2 ok: round-trip"
   else
     fail "L2: unexpected response: $OUT"
+  fi
+fi
+
+# L2m — bounded live MCP execution and built-in surface proof
+if [ "${RUN_L3_MCP:-0}" = "1" ] && [ "$HAVE_AUTH" = "1" ]; then
+  MCP_BIN=$(command -v codebase-memory-mcp 2>/dev/null || true)
+  if [ -z "$MCP_BIN" ]; then
+    note "L2m skip: codebase-memory-mcp not on PATH"
+  else
+    MCP_CONFIG=$(python3 -c 'import json,sys; print(json.dumps({"mcpServers":{"codebase-memory-mcp":{"type":"stdio","command":sys.argv[1],"alwaysLoad":True}}}))' "$MCP_BIN")
+    run_live_mcp() {
+      local role=$1 tools=$2 allowed=$3 output
+      output=$(mktemp "${TMPDIR:-/tmp}/claude-live-mcp.XXXXXX")
+      if claude -p --print --setting-sources project --disable-slash-commands \
+        --strict-mcp-config --mcp-config "$MCP_CONFIG" \
+        --model sonnet --effort low --permission-mode dontAsk \
+        --tools "$tools" --allowedTools "$allowed" \
+        --system-prompt 'Use only the requested tool.' \
+        --output-format stream-json --verbose --no-session-persistence \
+        --max-turns 4 --max-budget-usd 0.10 \
+        'Call mcp__codebase-memory-mcp__list_projects exactly once. After a successful non-error tool result, reply exactly MCP_OK. Do not use any other tool.' \
+        >"$output" \
+        && python3 "$SCRIPT_DIR/tests/assert-live-mcp.py" "$role" <"$output"; then
+        note "L2m ok: $role executed MCP with its bounded built-in surface"
+      else
+        fail "L2m: $role live MCP regression failed"
+      fi
+      rm -f "$output"
+    }
+    run_live_mcp plan 'Read,Grep,Glob' 'mcp__codebase-memory-mcp'
+    run_live_mcp review 'Read,Grep,Glob,Bash' \
+      'Bash(git diff:*) Bash(git log:*) Bash(git show:*) Bash(git status:*) mcp__codebase-memory-mcp'
   fi
 fi
 

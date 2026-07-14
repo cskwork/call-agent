@@ -33,3 +33,29 @@
   - Smallest next fix: 정규화 구간만 사용 가능한 UTF-8 문자 로케일로 고정해 호출자의
     `LC_ALL`을 격리하고, `LC_ALL=C /bin/bash`에서 helper와 세 래퍼를 검증하는 smoke
     회귀 테스트를 추가한 뒤 전체 proof set을 다시 실행한다.
+
+## 2026-07-15T05:04:20+09:00 - verifier iteration 3
+
+- [ ] Criterion 1: plan/review 래퍼가 허용한 MCP 도구를 실제로 실행하면서 built-in
+  read-only 경계를 유지한다.
+  - Expected: 구성된 서버의 `mcp__<server>` 규칙이 실제 MCP tool call을 승인하고,
+    plan/review의 파일 수정 built-in은 실행할 수 없다.
+  - Actual: installed helper가 정확한 `mcp__codebase-memory-mcp`를 전달했지만
+    `--permission-mode plan`이 `mcp__codebase-memory-mcp__list_projects`를 거부했다.
+    Claude 2.1.209 직접 재현에서도 tool result가
+    `Cannot call mcp__codebase-memory-mcp__list_projects while in plan mode.`였고
+    `permission_denials`에 같은 도구가 기록됐다.
+  - Evidence: post-release session `2e14cd21-529a-4d10-9097-f6e617f34245`;
+    직접 재현은 MCP 도구 14개가 init에 노출되고 정확한 도구를 선택했지만 실행 단계에서
+    plan mode 거부. 반대로 `--permission-mode dontAsk --tools Read,Grep,Glob
+    --allowedTools mcp__codebase-memory-mcp`에서는 `list_projects`가 실행되고
+    `permission_denials=[]`; init built-in 목록은 `Glob`, `Grep`, `Read`뿐이었다.
+  - Smallest next fix: plan/review의 `plan` mode를 headless 제한 모드인 `dontAsk`로 바꾸고,
+    plan은 `--tools Read,Grep,Glob`, review는 `--tools Read,Grep,Glob,Bash`로 built-in
+    가용성을 제한한다. 기존 `--allowedTools`의 MCP server 규칙과 review의 read-only
+    `Bash(git diff|log|show|status:*)` 규칙만 사전 승인해 나머지 built-in 요청은 자동
+    거부한다. smoke는 argv뿐 아니라 tool allowlist를 확인하고, live 회귀는 MCP result가
+    non-error이며 `permission_denials=[]`임을 확인한다.
+  - Verification note: 이 관리 환경에서는 허용된 review Bash도
+    `~/.claude/session-env` 생성 EPERM으로 실행 전 차단되므로, scoped Bash 실행 증명은
+    정상 호스트에서 재확인한다. 이는 MCP 권한 거부와 별개의 기존 host-policy 제약이다.

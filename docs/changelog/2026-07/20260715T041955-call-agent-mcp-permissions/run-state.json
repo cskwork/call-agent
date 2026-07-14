@@ -24,19 +24,21 @@
     "status": "open"
   },
   "phase": "Finalize",
-  "iteration": 2,
+  "iteration": 3,
   "unresolved_gates": [],
-  "regression_ledger": [],
+  "regression_ledger": [
+    "Post-release live call: plan mode denied mcp__codebase-memory-mcp__list_projects despite exact allowedTools server rule."
+  ],
   "blockers": [],
-  "last_proof_command": "/bin/bash /Users/danny/Documents/PARA/Resource/supergoal-skill/templates/commit-gate.sh docs/changelog/2026-07/20260715T041955-call-agent-mcp-permissions cli",
-  "next_action": "commit gate를 통과한 뒤 commit/push, 설치본 동기화, v0.2.0 release와 원격 ref를 확인한다.",
+  "last_proof_command": "/bin/bash /Users/danny/Documents/PARA/Resource/supergoal-skill/templates/commit-gate.sh docs/changelog/2026-07/20260715T041955-call-agent-mcp-permissions cli (PASS)",
+  "next_action": "commit gate PASS 후 부모 agent가 변경을 commit/push하고 release 및 활성 설치본을 갱신한 뒤 원격 ref를 확인한다.",
   "forced_reflection": {
     "required_when_iteration_cap_hit": true,
-    "what_keeps_failing": "",
-    "likely_root_cause": "",
-    "unproven_requirement": "",
-    "regressed_previously_green": "",
-    "smallest_next_action": ""
+    "what_keeps_failing": "smoke가 allowedTools argv만 확인해 실제 Claude permission-mode 실행 의미를 검증하지 못한다.",
+    "likely_root_cause": "Claude 2.1.209의 plan mode가 allowedTools보다 우선해 MCP tool call을 차단한다.",
+    "unproven_requirement": "plan/review의 built-in read-only 경계를 유지하면서 구성된 MCP 도구를 실제 실행한다.",
+    "regressed_previously_green": "GOAL criterion 1과 QA의 plan/review MCP 실행 PASS 판정.",
+    "smallest_next_action": "dontAsk와 역할별 --tools allowlist로 전환하고 실제 MCP non-error result 및 빈 permission_denials를 회귀 검증한다."
   },
-  "updated_at": "2026-07-14T19:55:47Z"
+  "updated_at": "2026-07-14T20:20:15Z"
 }

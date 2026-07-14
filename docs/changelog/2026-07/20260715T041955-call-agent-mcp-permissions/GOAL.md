@@ -11,7 +11,7 @@ Claude 위임 래퍼가 실행 시점에 연결된 MCP 서버를 찾고, 각 서
 
 ## Success Criteria
 
-- [x] plan/review/implement 래퍼 모두 연결된 MCP 서버의 모든 도구를 자동 허용한다. - verify: `bash skills/call-agent/reference/claude/tests/smoke.sh`
+- [x] plan/review/implement 래퍼 모두 연결된 MCP 서버의 모든 도구를 자동 허용한다. - verify: `RUN_L3_MCP=1 bash skills/call-agent/reference/claude/tests/smoke.sh`
 - [x] MCP 서버 목록을 읽지 못해도 기존 Claude 호출은 유지된다. - verify: `bash skills/call-agent/reference/claude/tests/smoke.sh`
 - [x] 기존 권한 우회 방지와 전체 skill 회귀 검증이 통과한다. - verify: `bash tests/run-all.sh`
 - [x] skill 구조 검증이 통과한다. - verify: `python3 /Users/danny/.agents/skills/.system/skill-creator/scripts/quick_validate.py skills/call-agent`

@@ -20,7 +20,8 @@ SYS="You are a planner. Produce an actionable plan with numbered steps, risks, a
 OUT_JSON=$(claude -p --print \
   --model opus \
   --effort high \
-  --permission-mode plan \
+  --permission-mode dontAsk \
+  --tools Read,Grep,Glob \
   "${CLAUDE_ALLOWED_TOOLS_ARGS[@]+"${CLAUDE_ALLOWED_TOOLS_ARGS[@]}"}" \
   --output-format json \
   --no-session-persistence \
