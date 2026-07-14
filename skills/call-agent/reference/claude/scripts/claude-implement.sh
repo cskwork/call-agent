@@ -12,6 +12,8 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 "$SCRIPT_DIR/preflight-auth.sh" >/dev/null || exit 2
 "$SCRIPT_DIR/preflight-shell.sh" >/dev/null || exit $?
+source "$SCRIPT_DIR/claude-mcp-tools.sh"
+load_claude_allowed_tools Read Grep Glob Edit Write Bash
 
 PROMPT="$*"
 SYS="Implement the requested task in the current workspace. Inspect before editing, keep changes scoped, and run relevant verification. Do not commit, push, or deploy unless explicitly requested. Report changed files and verification evidence."
@@ -20,7 +22,7 @@ OUT_JSON=$(claude -p --print \
   --model opus \
   --effort high \
   --permission-mode acceptEdits \
-  --allowedTools "Read Grep Glob Edit Write Bash" \
+  "${CLAUDE_ALLOWED_TOOLS_ARGS[@]+"${CLAUDE_ALLOWED_TOOLS_ARGS[@]}"}" \
   --output-format json \
   --no-session-persistence \
   --add-dir "$PWD" \

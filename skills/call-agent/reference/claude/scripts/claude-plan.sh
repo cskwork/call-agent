@@ -11,6 +11,8 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 "$SCRIPT_DIR/preflight-auth.sh" >/dev/null || exit 2
+source "$SCRIPT_DIR/claude-mcp-tools.sh"
+load_claude_allowed_tools
 
 PROMPT="$*"
 SYS="You are a planner. Produce an actionable plan with numbered steps, risks, and acceptance criteria. Do not modify any files. Output as markdown."
@@ -19,6 +21,7 @@ OUT_JSON=$(claude -p --print \
   --model opus \
   --effort high \
   --permission-mode plan \
+  "${CLAUDE_ALLOWED_TOOLS_ARGS[@]+"${CLAUDE_ALLOWED_TOOLS_ARGS[@]}"}" \
   --output-format json \
   --no-session-persistence \
   --add-dir "$PWD" \

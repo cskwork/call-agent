@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "mode": "LEGACY",
+  "intent_gate": {
+    "intent": "Claude call-agent 위임에서 연결된 모든 MCP 서버 도구를 자동 허용한다.",
+    "confidence": "high",
+    "mode": "LEGACY",
+    "capability_refs": ["supergoal", "skill-creator", "call-agent"],
+    "uncertainty": "Claude CLI는 MCP glob을 지원하지 않아 서버 이름 동적 열거가 필요하다."
+  },
+  "branches": {
+    "source_base_branch": "master",
+    "target_integration_branch": "master",
+    "run_branch": "fix/claude-allow-all-mcp",
+    "worktree_path": "/private/tmp/call-agent-allow-all-mcp",
+    "refs_verified": true
+  },
+  "plan_approval": "user",
+  "completion_promise": {
+    "promised_outcome": "세 Claude 래퍼가 연결된 모든 MCP 서버 도구를 자동 허용하고 검증 후 원격 master에 반영한다.",
+    "required_proof": ["claude smoke", "full suite", "skill validator", "remote ref"],
+    "stop_condition": "모든 기준 PASS, commit/push, origin/master 확인",
+    "max_iterations": 3,
+    "status": "open"
+  },
+  "phase": "Finalize",
+  "iteration": 2,
+  "unresolved_gates": [],
+  "regression_ledger": [],
+  "blockers": [],
+  "last_proof_command": "/bin/bash /Users/danny/Documents/PARA/Resource/supergoal-skill/templates/commit-gate.sh docs/changelog/2026-07/20260715T041955-call-agent-mcp-permissions cli",
+  "next_action": "commit gate를 통과한 뒤 commit/push, 설치본 동기화, v0.2.0 release와 원격 ref를 확인한다.",
+  "forced_reflection": {
+    "required_when_iteration_cap_hit": true,
+    "what_keeps_failing": "",
+    "likely_root_cause": "",
+    "unproven_requirement": "",
+    "regressed_previously_green": "",
+    "smallest_next_action": ""
+  },
+  "updated_at": "2026-07-14T19:55:47Z"
+}
