@@ -24,7 +24,7 @@ Backward-trace: clean
 | `bash skills/call-agent/reference/claude/tests/smoke.sh` | frozen_repo | Claude 래퍼 계약 |
 | `RUN_L3_MCP=1 /bin/bash skills/call-agent/reference/claude/tests/smoke.sh` | evaluator_owned | plan/review 실제 MCP 실행, 빈 permission denials, 정확한 built-in 노출 |
 | `bash tests/run-all.sh` | frozen_repo | 전체 skill 회귀 |
-| `/opt/anaconda3/bin/python /Users/danny/.agents/skills/.system/skill-creator/scripts/quick_validate.py skills/call-agent` | evaluator_owned | skill 구조 |
+| `/opt/anaconda3/bin/python ~/.agents/skills/.system/skill-creator/scripts/quick_validate.py skills/call-agent` | evaluator_owned | skill 구조 |
 | `claude -p --strict-mcp-config --mcp-config=<disposable-config>` under UTF-8 and `LC_ALL=C` | evaluator_owned | 실제 MCP namespace와 Unicode/locale 동치성 |
 | `claude -p --permission-mode plan --allowedTools mcp__codebase-memory-mcp` live `list_projects` | evaluator_owned | 정확한 MCP 규칙도 plan mode에서 실행 거부됨 |
 | `git diff --check` 및 production script policy 검색 | evaluator_owned | diff 위생과 권한 경계 |

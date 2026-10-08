@@ -30,7 +30,7 @@
     "Post-release live call: plan mode denied mcp__codebase-memory-mcp__list_projects despite exact allowedTools server rule."
   ],
   "blockers": [],
-  "last_proof_command": "/bin/bash /Users/danny/Documents/PARA/Resource/supergoal-skill/templates/commit-gate.sh docs/changelog/2026-07/20260715T041955-call-agent-mcp-permissions cli (PASS)",
+  "last_proof_command": "/bin/bash /Users/<user>/Documents/PARA/Resource/supergoal-skill/templates/commit-gate.sh docs/changelog/2026-07/20260715T041955-call-agent-mcp-permissions cli (PASS)",
   "next_action": "commit gate PASS 후 부모 agent가 변경을 commit/push하고 release 및 활성 설치본을 갱신한 뒤 원격 ref를 확인한다.",
   "forced_reflection": {
     "required_when_iteration_cap_hit": true,
