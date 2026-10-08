@@ -33,7 +33,7 @@
 
 - Before proof: 현재 세 래퍼에는 `mcp__<server>` 허용 항목이 없고 smoke에도 해당 계약이 없다.
 - Step -> GOAL.md criterion: 1-3 -> 1,2; 4-5 -> 3,4
-- Trusted commands: `bash skills/call-agent/reference/claude/tests/smoke.sh` (frozen_repo), `bash tests/run-all.sh` (frozen_repo), `python3 /Users/danny/.agents/skills/.system/skill-creator/scripts/quick_validate.py skills/call-agent` (evaluator_owned)
+- Trusted commands: `bash skills/call-agent/reference/claude/tests/smoke.sh` (frozen_repo), `bash tests/run-all.sh` (frozen_repo), `python3 ~/.agents/skills/.system/skill-creator/scripts/quick_validate.py skills/call-agent` (evaluator_owned)
 
 ## Grounding ledger
 
