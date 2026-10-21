@@ -48,6 +48,7 @@ Earlier versions of this repo shipped **five** separate skills (`agy-call`, `cod
 
 1. It classifies your request against a small table (which target tool, which capability).
 2. It loads exactly one detailed file — `reference/<target>/call.md` — and follows it.
+3. When the task reads or changes code, data, or infrastructure, it also loads `reference/brief.md` and writes the delegate's brief from it: verified facts quoted from the delegate's own checkout, measured data shape, consumers of every touched interface, test baseline, and an autonomy line so the delegate does not stop to ask.
 
 Why one skill instead of five:
 
