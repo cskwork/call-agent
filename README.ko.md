@@ -1,5 +1,7 @@
 # call-agent
 
+릴리스 준비: **v0.4.0** ([VERSION](./VERSION), [변경 이력](./docs/changelog/changelog-2026-10-28.md)).
+
 **한국어** · [English](./README.md)
 
 > 한 줄 요약: 사용 중인 AI CLI(예: Claude Code)가 못 하는 일을 다른 AI CLI(Codex, Antigravity, Kiro, Claude Code, NotebookLM)에게 **자동으로 떠넘기게** 해주는 단일 "위임 스킬"(`call-agent`)입니다.

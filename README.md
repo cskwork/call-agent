@@ -2,6 +2,8 @@
 
 [한국어](./README.ko.md) · **English**
 
+Release preparation: **v0.4.0** ([VERSION](./VERSION), [changelog](./docs/changelog/changelog-2026-10-28.md)).
+
 > One-line summary: a single "delegation skill" (`call-agent`) that lets the AI CLI you're currently using (e.g. Claude Code) **automatically hand work off** to another AI CLI (Codex, Antigravity, Kiro, Claude Code, NotebookLM) when the other tool is better at it.
 
 ---
